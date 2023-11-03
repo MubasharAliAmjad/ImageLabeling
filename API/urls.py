@@ -12,6 +12,8 @@ router = DefaultRouter()
 # router.register(r'session', views.Session_View, basename='session')
 router.register(r'project', views.Project_View, basename='project')
 router.register(r'unzip', views.UnZip_View, basename='unzip')
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
     path('swagger<str:format>', schema_view.without_ui(cache_timeout=0), name='schema-json'),
@@ -21,4 +23,4 @@ urlpatterns = [
     # path('dashboard/', views.dashboard, name="dashboard"),
     # path('test/', views.test, name="test"),
     # path('show/', views.show, name="show"),
-]
+]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

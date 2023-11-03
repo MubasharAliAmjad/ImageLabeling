@@ -83,7 +83,7 @@ class Unzip_Serializer(serializers.Serializer):
 class Slice_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Slice
-        fields = ["zoom"]
+        fields = "__all__"
 
 # class Type_Serializer(serializers.ModelSerializer):
 #     class Meta:
@@ -99,6 +99,13 @@ class Image_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = ["image"]
+        
+    def to_representation(self, instance):
+        data = super(Image_Serializer, self).to_representation(instance)
+        if instance.image:
+            data['image'] = f'media/{instance.image.url}'
+        return data
+        
 
 class Category_Type_Serializer(serializers.ModelSerializer):
     slice = Slice_Serializer()
@@ -108,7 +115,10 @@ class Category_Type_Serializer(serializers.ModelSerializer):
         fields = ["category","type", "image_list", "slice"]
 
     def get_image_list(self, obj):
-        return obj.image.all().values()
+        image_list = obj.image.all().values()
+        for image in image_list:
+            image['image'] = f"media/{image['image']}"
+        return image_list
 
 class Reference_Folder_Serializer(serializers.ModelSerializer):
     image_list =  serializers.SerializerMethodField()
@@ -117,7 +127,10 @@ class Reference_Folder_Serializer(serializers.ModelSerializer):
         fields = ["reference_name", "image_list"]
 
     def get_image_list(self, obj):
-        return obj.image.all().values()
+        image_list = obj.image.all().values()
+        for image in image_list:
+            image['image'] = f"media/{image['image']}"
+        return image_list
     
 class Labels_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -159,8 +172,8 @@ class Session_Serializer(serializers.ModelSerializer):
 class Project_Serializer(serializers.ModelSerializer):
     # folder_names = Folder_Input_Serializer(write_only = True)
     zip_folder = serializers.CharField(max_length = 150, write_only = True)
-    cols_number = serializers.IntegerField()
-    rows_number = serializers.IntegerField()
+    # cols_number = serializers.IntegerField()
+    # rows_number = serializers.IntegerField()
     rows_list = serializers.ListField(max_length = 50, write_only = True)
     columns_list = serializers.ListField(max_length = 50, write_only = True)
     session = Session_Serializer(many = True, read_only = True)
@@ -201,8 +214,8 @@ class Project_Serializer(serializers.ModelSerializer):
 
         # user_list_folders = validated_data.pop('list_folders')
         # user_list_folders = user_list_folders.get('list_folders') 
-        rows_number = validated_data.pop('rows_number')
-        cols_number = validated_data.pop('cols_number')
+        # rows_number = validated_data.pop('rows_number')
+        # cols_number = validated_data.pop('cols_number')
         rows_list = validated_data.pop('rows_list')
         # rows_list = user_folder_names.get('rows_list') 
         columns_list = validated_data.pop('columns_list') 
@@ -342,11 +355,11 @@ class Project_Serializer(serializers.ModelSerializer):
                 print(f"Error deleting folder: {e}")
         else:
             print(f"Folder '{zip_folder}' does not exist in media.")
-        
+        return project
         response_data = {
             "project": project,
-            "rows_number": rows_number,
-            "cols_number": cols_number
+            # "rows_number": rows_number,
+            # "cols_number": cols_number
 
             }
         return response_data

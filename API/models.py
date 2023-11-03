@@ -4,29 +4,13 @@ from django.dispatch import receiver
 import os
 from django.utils import timezone
 # Create your models here.
-class Slice(models.Model):
-    zoom = models.PositiveIntegerField(default=0)
-    # field 2
-    # field 3
-
-# class Type(models.Model):
-#     type_name = models.CharField(max_length=20)
-
-#     def __str__(self):
-#         return self.type_name
-
-# class Category(models.Model):
-#     category_name = models.CharField(max_length=20)
-
-#     def __str__(self):
-#         return self.category_name
-
 
 class Image(models.Model):
     image = models.ImageField(upload_to='API/dicom_images/')
     
     def __str__(self):
-        return self.image.name
+        # f'media/{instance.image.url}'
+        return f'media/{self.image.name}'
     
 class Reference_Folder(models.Model):
     reference_name = models.CharField(max_length=100)
@@ -34,16 +18,6 @@ class Reference_Folder(models.Model):
 
     def __str__(self) :
         return self.reference_name
-
-class Category_Type(models.Model):
-    category = models.CharField(max_length=100)
-    type = models.CharField(max_length=100)
-    image = models.ManyToManyField(Image, blank=True)
-    slice = models.ForeignKey(Slice, on_delete=models.CASCADE, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add = True)
-
-    def __str__(self):
-        return f"{self.category} _ {self.type}"
 
 class Labels(models.Model):
     value = models.CharField(max_length=100)
@@ -56,6 +30,21 @@ class Options(models.Model):
 
     def __str__(self):
         return self.value
+    
+class Slice(models.Model):
+    zoom = models.PositiveIntegerField(default=0)
+    options = models.ManyToManyField(Options)
+    labels = models.ManyToManyField(Labels)
+
+class Category_Type(models.Model):
+    category = models.CharField(max_length=100)
+    type = models.CharField(max_length=100)
+    image = models.ManyToManyField(Image, blank=True)
+    slice = models.ForeignKey(Slice, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add = True)
+
+    def __str__(self):
+        return f"{self.category} _ {self.type}"
     
     
 class Case(models.Model):
