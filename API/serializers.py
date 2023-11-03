@@ -1,11 +1,12 @@
 from rest_framework import serializers
-from .models import Slice, Image, Category_Type, Labels, Session, Project, Case, Reference_Folder, Options
+from .models import Slice, Image, Category_Type, Labels, Session, Project, Case, Reference_Folder, Options, ZipFile
 import uuid
 from django.conf import settings
 import os, zipfile
 from django.core.files import File
 from django.core.files.storage import FileSystemStorage
 import copy
+from django.core.files.storage import default_storage
 
 
 class Unzip_Serializer(serializers.Serializer):
@@ -46,6 +47,21 @@ class Unzip_Serializer(serializers.Serializer):
             raise serializers.ValidationError("Uploaded file is required.")
 
         if uploaded_file.name.endswith('.zip'):
+            if ZipFile.objects.exists():
+                exist_file = ZipFile.objects.first()
+                file = exist_file.uploaded_file
+                
+                import pdb; pdb.set_trace()
+                if file and default_storage.exists(file.name):
+                    default_storage.delete(file.name)
+                
+                exist_file.uploaded_file = uploaded_file
+                exist_file.save()
+                
+            else:
+                zip_obj = ZipFile(uploaded_file = uploaded_file)
+                zip_obj.save()
+
             unique_id = str(uuid.uuid4())
             uploaded_file.name = f"{unique_id}_{uploaded_file.name}"
 
@@ -85,20 +101,16 @@ class Slice_Serializer(serializers.ModelSerializer):
         model = Slice
         fields = "__all__"
 
-# class Type_Serializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Type
-#         fields = ["type_name"]
-
-# class Category_Serializer(serializers.ModelSerializer): 
-#     class Meta:
-#         model = Category
-#         fields = ["category_name"]
 
 class Image_Serializer(serializers.ModelSerializer):
+    slice = Slice_Serializer()
     class Meta:
         model = Image
-        fields = ["image"]
+        fields = ["image", "slice"]
+
+    def update(self, instance, validated_data):
+        import pdb; pdb.set_trace()
+        return super().update(instance, validated_data)
         
     def to_representation(self, instance):
         data = super(Image_Serializer, self).to_representation(instance)
@@ -108,11 +120,10 @@ class Image_Serializer(serializers.ModelSerializer):
         
 
 class Category_Type_Serializer(serializers.ModelSerializer):
-    slice = Slice_Serializer()
     image_list = serializers.SerializerMethodField()
     class Meta:
         model = Category_Type
-        fields = ["category","type", "image_list", "slice"]
+        fields = ["category","type", "image_list"]
 
     def get_image_list(self, obj):
         image_list = obj.image.all().values()
@@ -276,46 +287,47 @@ class Project_Serializer(serializers.ModelSerializer):
                         dicom_file.close()
                             
             case_obj = Case.objects.create(case_name = case, notes = notes, cols_number = cols_number, rows_number = rows_number, randomize_cases = randomize_cases, randomize_categories = randomize_categories, reference_folder = reference_obj)
-            
+
             case_obj.labels.set(label_list)
             case_obj.options.set(option_list)
 
             category_type_list = []
-            for index, (row_data, column_data) in enumerate(zip(rows_list, columns_list)):
+            for row_data in rows_list:
+                for column_data in  columns_list:
                 
-                if f"{row_data}_{column_data}" in list_folders_in_zip:
-                    file_folder = f"{row_data}_{column_data}"
+                    if f"{row_data}_{column_data}" in list_folders_in_zip:
+                        file_folder = f"{row_data}_{column_data}"
 
-                    images_and_path = self.find_images(list_cases_in_zip, subfolders_path, file_folder)
-                    category_type = Category_Type.objects.create(category = row_data, type = column_data)
-                    for image in images_and_path.get("list_images"):
-                        file_path = os.path.join(images_and_path.get("image_folder_path"), image)
-                        dicom_file = open(file_path, "rb")
-                        image = Image(image=File(dicom_file, name=image))
-                        image.save()
-                        category_type.image.add(image)
-                        dicom_file.close()
-                        
-                    category_type_list.append(category_type)
-                elif f"{column_data}_{row_data}" in list_folders_in_zip:
-                    file_folder = f"{column_data}_{row_data}"
+                        images_and_path = self.find_images(list_cases_in_zip, subfolders_path, file_folder)
+                        category_type = Category_Type.objects.create(category = row_data, type = column_data)
+                        for image in images_and_path.get("list_images"):
+                            file_path = os.path.join(images_and_path.get("image_folder_path"), image)
+                            dicom_file = open(file_path, "rb")
+                            image = Image(image=File(dicom_file, name=image))
+                            image.save()
+                            category_type.image.add(image)
+                            dicom_file.close()
+                            
+                        category_type_list.append(category_type)
+                    elif f"{column_data}_{row_data}" in list_folders_in_zip:
+                        file_folder = f"{column_data}_{row_data}"
 
-                    images_and_path = self.find_images(list_cases_in_zip, subfolders_path, file_folder)
-                    category_type = Category_Type.objects.create(category = column_data, type = row_data)
+                        images_and_path = self.find_images(list_cases_in_zip, subfolders_path, file_folder)
+                        category_type = Category_Type.objects.create(category = column_data, type = row_data)
 
-                    for image in images_and_path.get("list_images"):
-                        file_path = os.path.join(images_and_path.get("image_folder_path"), image)
-                        dicom_file = open(file_path, "rb")
-                        image = Image(image=File(dicom_file, name=image))
-                        image.save()
-                        category_type.image.add(image)
-                        dicom_file.close()
-                    category_type_list.append(category_type)
-                else:
-                    category_type = Category_Type.objects.create(category = column_data, type = row_data)
-                    category_type_list.append(category_type)
-                case_obj.category_type.set(category_type_list)
-                case_list.append(case_obj)
+                        for image in images_and_path.get("list_images"):
+                            file_path = os.path.join(images_and_path.get("image_folder_path"), image)
+                            dicom_file = open(file_path, "rb")
+                            image = Image(image=File(dicom_file, name=image))
+                            image.save()
+                            category_type.image.add(image)
+                            dicom_file.close()
+                        category_type_list.append(category_type)
+                    else:
+                        category_type = Category_Type.objects.create(category = column_data, type = row_data)
+                        category_type_list.append(category_type)
+                    case_obj.category_type.set(category_type_list)
+                    case_list.append(case_obj)
             
         session = Session.objects.create()
         
@@ -357,14 +369,8 @@ class Project_Serializer(serializers.ModelSerializer):
                 print(f"Error deleting folder: {e}")
         else:
             print(f"Folder '{zip_folder}' does not exist in media.")
+            
         return project
-        response_data = {
-            "project": project,
-            # "rows_number": rows_number,
-            # "cols_number": cols_number
-
-            }
-        return response_data
 
     # def update(self, instance, validated_data):
     #     instance.project_name = validated_data.get('project_name', instance.project_name)

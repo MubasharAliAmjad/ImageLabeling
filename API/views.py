@@ -27,6 +27,10 @@ class Project_View(viewsets.ModelViewSet):
     permission_classes = [CustomPermission]
 
 
+class Image_View(viewsets.ModelViewSet):
+    queryset = Image.objects.all()
+    serializer_class = Image_Serializer
+
 # class Slice_View(viewsets.ModelViewSet):
 #     queryset = Slice.objects.all()
 #     serializer_class = Slice_Serializer
