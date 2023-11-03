@@ -87,7 +87,7 @@ DATABASES = {
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
-    "https://c840-45-117-104-111.ngrok-free.app"
+    "https://8d24-119-155-3-247.ngrok-free.app",
 ]
 CORS_ALLOW_CREDENTIALS=True
 CROSS_ORIGIN_ALLOW_ALL = True
