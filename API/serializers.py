@@ -159,6 +159,8 @@ class Session_Serializer(serializers.ModelSerializer):
 class Project_Serializer(serializers.ModelSerializer):
     # folder_names = Folder_Input_Serializer(write_only = True)
     zip_folder = serializers.CharField(max_length = 150, write_only = True)
+    cols_number = serializers.IntegerField()
+    rows_number = serializers.IntegerField()
     rows_list = serializers.ListField(max_length = 50, write_only = True)
     columns_list = serializers.ListField(max_length = 50, write_only = True)
     session = Session_Serializer(many = True, read_only = True)
@@ -199,6 +201,8 @@ class Project_Serializer(serializers.ModelSerializer):
 
         # user_list_folders = validated_data.pop('list_folders')
         # user_list_folders = user_list_folders.get('list_folders') 
+        rows_number = validated_data.pop('rows_number')
+        cols_number = validated_data.pop('cols_number')
         rows_list = validated_data.pop('rows_list')
         # rows_list = user_folder_names.get('rows_list') 
         columns_list = validated_data.pop('columns_list') 
@@ -338,8 +342,14 @@ class Project_Serializer(serializers.ModelSerializer):
                 print(f"Error deleting folder: {e}")
         else:
             print(f"Folder '{zip_folder}' does not exist in media.")
+        
+        response_data = {
+            "project": project,
+            "rows_number": rows_number,
+            "cols_number": cols_number
 
-        return project
+            }
+        return response_data
 
     # def update(self, instance, validated_data):
     #     instance.project_name = validated_data.get('project_name', instance.project_name)
