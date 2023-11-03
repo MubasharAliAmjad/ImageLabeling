@@ -232,7 +232,8 @@ class Project_Serializer(serializers.ModelSerializer):
         # sessions_data = validated_data.pop('session')
         # session_list = []
         case_data_item = validated_data.pop("case")
-        # import pdb; pdb.set_trace()
+        cols_number = case_data_item[0].get('cols_number')
+        rows_number = case_data_item[0].get('rows_number')
 
         labels_data = case_data_item[0].get('labels')
         options_data = case_data_item[0].pop('options')
@@ -274,7 +275,8 @@ class Project_Serializer(serializers.ModelSerializer):
                         reference_obj.image.add(image)
                         dicom_file.close()
                             
-            case_obj = Case.objects.create(case_name = case, notes = notes, randomize_cases = randomize_cases, randomize_categories = randomize_categories, reference_folder = reference_obj)
+            case_obj = Case.objects.create(case_name = case, notes = notes, cols_number = cols_number, rows_number = rows_number, randomize_cases = randomize_cases, randomize_categories = randomize_categories, reference_folder = reference_obj)
+            
             case_obj.labels.set(label_list)
             case_obj.options.set(option_list)
 

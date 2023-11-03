@@ -50,6 +50,8 @@ class Category_Type(models.Model):
 class Case(models.Model):
     case_name = models.CharField(max_length=50)
     notes = models.TextField(blank=True)
+    cols_number = models.PositiveIntegerField()
+    rows_number =models.PositiveIntegerField()
 
     category_type = models.ManyToManyField(Category_Type, blank=True)
 
