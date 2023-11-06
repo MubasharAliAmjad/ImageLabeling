@@ -19,6 +19,7 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),    
     path('', include(router.urls)),
     path('read_local/', views.ReadFromLocal.as_view()),
+    path('export_data/', views.Export_Data_view.as_view()),
     # path('index/', views.index, name="index"),
     # path('dashboard/', views.dashboard, name="dashboard"),
     # path('test/', views.test, name="test"),
