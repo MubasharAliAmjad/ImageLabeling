@@ -13,6 +13,7 @@ import uuid
 from django.conf import settings
 from django.core.files.storage import default_storage
 import csv
+from django.contrib.sites.shortcuts import get_current_site
 # Create your views here.
 
 class UnZip_View(viewsets.ViewSet):
@@ -117,8 +118,8 @@ class Image_View(viewsets.ModelViewSet):
     serializer_class = Image_Serializer
 
 class Export_Data_view(APIView):
-    def get(self,request):
-        project_data = Project.objects.get(id = 63)
+    def get(self,request, id):
+        project_data = Project.objects.get(id = id)
         date_time = project_data.created_at.strftime("%Y-%m-%d_%H-%M")
         title = f"{project_data.project_name}-{date_time}.csv"
         
@@ -126,36 +127,38 @@ class Export_Data_view(APIView):
         response['Content-Disposition'] = f'attachment; filename="{title}"'
 
         writer = csv.writer(response)
-        writer.writerow(['Project Name', 'Question', 'Case Name', 'Notes', 'Cols Number', 'Rows Number', 'Randomize Cases', 'Random Categories', 'Labels', 'Options', 'Reference Name', 'Reference Images', 'Category', 'Type', 'Image URL', 'Created at'])  # Add header row
+        writer.writerow(['Project Name', 'Question', 'Case Name', 'Notes', 'Cols Number', 'Rows Number', 'Randomize Cases', 'Random Categories', 'Labels', 'Options', 'Reference Name', 'Reference Images', 'Category', 'Type', 'Image URL', 'Created at'])
         row = []
-        project_data = Project.objects.get(id = 63)  # Fetch the data from your model 
-        
 
         for session_item in project_data.session.all():    
             for case_item in session_item.case.all():
-                labels = []       
-                options = []
-                for label_item in case_item.labels.all():
-                    labels.append(label_item.value)
-                for options_item in case_item.options.all():
-                    options.append(options_item.value)
                 
-                reference_images = []
+                labels = ""
+                options = ""
+                for label_item in case_item.labels.all():
+                    labels = label_item.value + "," + labels
+
+                for options_item in case_item.options.all():
+                    options = options_item.value  + "," + options
+                
+                reference_images = ""
+                current_site = get_current_site(request)
                 for image in case_item.reference_folder.image.all():
                     
-                    image_urls = image.image.url
-                    reference_images.append(image_urls)
+                    image_urls = f"http://{current_site.domain}{image.image.url}"
+                    reference_images = image_urls  + "," + reference_images
 
                 reference_name = case_item.reference_folder.reference_name
-                # import pdb; pdb.set_trace()
-
+                
+                
                 for category_type_item in case_item.category_type.all():
-                    category_type_images = []
+                    category_type_images = ""
                     for image in category_type_item.image.all():
-                        image_urls = image.image.url
-                        category_type_images.append[image_urls]
+                        image_urls = f"http://{current_site.domain}{image.image.url}"
+                        
+                        category_type_images = image_urls + "," + category_type_images
 
-                    row = [project_data.project_name, project_data.question, case_item.case_name, case_item.notes, case_item.cols_number, case_item.rows_number, case_item.randomize_cases, case_item.randomize_categories, labels, options, reference_name, reference_images,category_type_item.category, category_type_item.type, images, project_data.created_at]
+                    row = [project_data.project_name, project_data.question, case_item.case_name, case_item.notes, case_item.cols_number, case_item.rows_number, case_item.randomize_cases, case_item.randomize_categories, labels, options, reference_name, reference_images,category_type_item.category, category_type_item.type, category_type_images, project_data.created_at]
 
                     writer.writerow(row)  
 
