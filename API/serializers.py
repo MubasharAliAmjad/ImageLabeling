@@ -50,10 +50,7 @@ class Unzip_Serializer(serializers.Serializer):
             if ZipFile.objects.exists():
                 exist_file = ZipFile.objects.first()
                 file = exist_file.uploaded_file
-                
-                import pdb; pdb.set_trace()
-                if file and default_storage.exists(file.name):
-                    default_storage.delete(file.name)
+                default_storage.delete(file.name)
                 
                 exist_file.uploaded_file = uploaded_file
                 exist_file.save()
