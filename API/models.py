@@ -7,6 +7,7 @@ from django.utils import timezone
 
 class Labels(models.Model):
     value = models.CharField(max_length=100)
+    checked = models.BooleanField(default=False)
 
     def __str__(self):
         return self.value
@@ -15,17 +16,18 @@ class ZipFile(models.Model):
     uploaded_file = models.FileField(upload_to="API/ZipFile")
 
 class Options(models.Model):
-    value= models.CharField(max_length=50)
+    value= models.CharField(max_length=100)
+    checked = models.BooleanField(default=False)
 
     def __str__(self):
         return self.value
 
 class Slice(models.Model):
     zoom = models.PositiveIntegerField(default=0)
-    opacity = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add = True)
-    options = models.ManyToManyField(Options)
-    labels = models.ManyToManyField(Labels)
+    # opacity = models.PositiveIntegerField(default=0)
+    # created_at = models.DateTimeField(auto_now_add = True)
+    # options = models.ManyToManyField(Options)
+    # labels = models.ManyToManyField(Labels)
 
 class Image(models.Model):
     image = models.ImageField(upload_to='API/dicom_images/')
