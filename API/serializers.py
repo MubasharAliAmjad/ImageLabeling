@@ -102,12 +102,14 @@ class Category_Type_Serializer(serializers.ModelSerializer):
     image_list = serializers.SerializerMethodField()
     class Meta:
         model = Category_Type
-        fields = ["category","type", "image_list"]
+        fields = "__all__"
 
     def get_image_list(self, obj):
+        
         image_list = obj.image.all().values()
         for image in image_list:
             image['image'] = f"media/{image['image']}"
+            
         return image_list
 
 class Reference_Folder_Serializer(serializers.ModelSerializer):
@@ -132,7 +134,14 @@ class Options_Serializer(serializers.ModelSerializer):
         model = Options
         fields = ["value"]
 
+class ReferenceItemSerializer(serializers.Serializer):
+    slice = serializers.IntegerField()
+    opacity = serializers.CharField(allow_blank=True)
+    zoomLevel = serializers.CharField(allow_blank=True)
+    # timestamp = serializers.CharField(allow_blank=True)
+
 class Slice_Serializer(serializers.ModelSerializer):
+    reference = ReferenceItemSerializer(many=True)
     labels = Labels_Serializer(many = True)
     options = Options_Serializer(many = True)
     class Meta:
@@ -140,21 +149,26 @@ class Slice_Serializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class Image_Serializer(serializers.ModelSerializer):
-    slice = Slice_Serializer()
-    class Meta:
-        model = Image
-        fields = ["image", "slice"]
 
-    def update(self, instance, validated_data):
-        import pdb; pdb.set_trace()
-        return super().update(instance, validated_data)
+
+# class Image_Serializer(serializers.ModelSerializer):
+#     slice = Slice_Serializer()
+#     class Meta:
+#         model = Image
+#         fields = ["image", "slice"]
+
+#     def update(self, instance, validated_data):
+
+#         import pdb; pdb.set_trace()
         
-    def to_representation(self, instance):
-        data = super(Image_Serializer, self).to_representation(instance)
-        if instance.image:
-            data['image'] = f'media/{instance.image.url}'
-        return data
+
+#         return super().update(instance, validated_data)
+        
+#     def to_representation(self, instance):
+#         data = super(Image_Serializer, self).to_representation(instance)
+#         if instance.image:
+#             data['image'] = f'media/{instance.image.url}'
+#         return data
 
 
 class Case_Serializer(serializers.ModelSerializer):

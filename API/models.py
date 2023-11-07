@@ -22,6 +22,8 @@ class Options(models.Model):
 
 class Slice(models.Model):
     zoom = models.PositiveIntegerField(default=0)
+    opacity = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add = True)
     options = models.ManyToManyField(Options)
     labels = models.ManyToManyField(Labels)
 

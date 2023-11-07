@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.response import Response
 from .models import Slice, Category_Type, Labels, Session, Project, Image, ZipFile
-from .serializers import Slice_Serializer, Image_Serializer, Category_Type_Serializer, Labels_Serializer, Session_Serializer, Project_Serializer, Unzip_Serializer
+from .serializers import Slice_Serializer, Category_Type_Serializer, Labels_Serializer, Session_Serializer, Project_Serializer, Unzip_Serializer
 from rest_framework import viewsets
 from rest_framework import status
 from django.http import HttpResponse
@@ -116,9 +116,9 @@ class Project_View(viewsets.ModelViewSet):
     permission_classes = [CustomPermission]
 
 
-class Image_View(viewsets.ModelViewSet):
-    queryset = Image.objects.all()
-    serializer_class = Image_Serializer
+# class Image_View(viewsets.ModelViewSet):
+#     queryset = Image.objects.all()
+#     serializer_class = Image_Serializer
 
 class Export_Data_view(APIView):
     def get(self,request, id):
@@ -129,39 +129,17 @@ class Export_Data_view(APIView):
         # response = HttpResponse(content_type='text/csv')
         # response['Content-Disposition'] = f'attachment; filename="{title}"'
         csv_data = []
-        csv_data.append(['Project Name', 'Question', 'Case Name', 'Notes', 'Cols Number', 'Rows Number', 'Randomize Cases', 'Random Categories', 'Labels', 'Options', 'Reference Name', 'Reference Images', 'Category', 'Type', 'Image URL', 'Created at'])
+        csv_data.append(['Project Id', 'Session Id', 'Case Id', 'TimeStamp', 'Category_Type', 'Slice Id', 'Score'])
         # writer.writerow()
         row = []
 
         for session_item in project_data.session.all():    
             for case_item in session_item.case.all():
                 
-                labels = ""
-                options = ""
-                for label_item in case_item.labels.all():
-                    labels = label_item.value + "," + labels
-
-                for options_item in case_item.options.all():
-                    options = options_item.value  + "," + options
-                
-                reference_images = ""
-                current_site = get_current_site(request)
-                for image in case_item.reference_folder.image.all():
-                    
-                    image_urls = f"http://{current_site.domain}{image.image.url}"
-                    reference_images = image_urls  + "," + reference_images
-
-                reference_name = case_item.reference_folder.reference_name
-                
-                
                 for category_type_item in case_item.category_type.all():
-                    category_type_images = ""
-                    for image in category_type_item.image.all():
-                        image_urls = f"http://{current_site.domain}{image.image.url}"
-                        
-                        category_type_images = image_urls + "," + category_type_images
+                    category_type = f"{category_type_item.category}_{category_type_item.type}"
 
-                    row = [project_data.project_name, project_data.question, case_item.case_name, case_item.notes, case_item.cols_number, case_item.rows_number, case_item.randomize_cases, case_item.randomize_categories, labels, options, reference_name, reference_images,category_type_item.category, category_type_item.type, category_type_images, project_data.created_at]
+                    row = [project_data.id, session_item.id, case_item.id, project_data.created_at, category_type, "Nill", "Nill"]
 
                     csv_data.append(row)
 
@@ -171,9 +149,9 @@ class Export_Data_view(APIView):
         response_data = {'csv_text': csv_text}
         return Response(response_data)
 
-# class Slice_View(viewsets.ModelViewSet):
-#     queryset = Slice.objects.all()
-#     serializer_class = Slice_Serializer
+class Slice_View(viewsets.ModelViewSet):
+    queryset = Slice.objects.all()
+    serializer_class = Slice_Serializer
 
 # class Type_View(viewsets.ModelViewSet):
 #     queryset = Type.objects.all()
@@ -191,9 +169,9 @@ class Export_Data_view(APIView):
 #     queryset = Labels.objects.all()
 #     serializer_class = Labels_Serializer
 
-# class Session_View(viewsets.ModelViewSet):
-#     queryset = Session.objects.all()
-#     serializer_class = Session_Serializer
+class Session_View(viewsets.ModelViewSet):
+    queryset = Session.objects.all()
+    serializer_class = Session_Serializer
 
 class CSVTestView(TemplateView):
     template_name = 'test.html'
