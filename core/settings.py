@@ -59,7 +59,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR.joinpath("templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -87,15 +87,16 @@ DATABASES = {
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
-    "https://8d24-119-155-3-247.ngrok-free.app",
+    "http://localhost:3000",
+    # "https://8d24-119-155-3-247.ngrok-free.app",
 ]
 CORS_ALLOW_CREDENTIALS=True
-CROSS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ORIGIN_WHITELIST = (
-    'http://localhost:3000',
-)
-CSRF_COOKIE_SECURE = False
+# CROSS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ORIGIN_WHITELIST = (
+#     'http://localhost:3000',
+# )
+# CSRF_COOKIE_SECURE = False
 CORS_ALLOW_HEADERS = (
     # 'Encryption-IV',
     # 'Encryption-Key',
@@ -111,7 +112,7 @@ CORS_ALLOW_METHODS = [
     'PATCH',
     'DELETE',
 ]
-CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_CREDENTIALS = True
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:3000",
     

@@ -28,7 +28,7 @@ class Slice(models.Model):
 class Image(models.Model):
     image = models.ImageField(upload_to='API/dicom_images/')
     slice = models.ForeignKey(Slice, on_delete=models.CASCADE, null=True, blank=True)
-    
+
     def __str__(self):
         # f'media/{instance.image.url}'
         return f'media/{self.image.name}'

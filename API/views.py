@@ -14,6 +14,7 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 import csv
 from django.contrib.sites.shortcuts import get_current_site
+from django.views.generic import TemplateView
 # Create your views here.
 
 class UnZip_View(viewsets.ViewSet):
@@ -188,3 +189,5 @@ class Export_Data_view(APIView):
 #     queryset = Session.objects.all()
 #     serializer_class = Session_Serializer
 
+class CSVTestView(TemplateView):
+    template_name = 'test.html'

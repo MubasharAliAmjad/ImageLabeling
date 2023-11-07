@@ -93,28 +93,10 @@ class Unzip_Serializer(serializers.Serializer):
             raise serializers.ValidationError("Uploaded file is not zip file.")
 
 
-class Slice_Serializer(serializers.ModelSerializer):
-    class Meta:
-        model = Slice
-        fields = "__all__"
 
 
-class Image_Serializer(serializers.ModelSerializer):
-    slice = Slice_Serializer()
-    class Meta:
-        model = Image
-        fields = ["image", "slice"]
 
-    def update(self, instance, validated_data):
-        import pdb; pdb.set_trace()
-        return super().update(instance, validated_data)
-        
-    def to_representation(self, instance):
-        data = super(Image_Serializer, self).to_representation(instance)
-        if instance.image:
-            data['image'] = f'media/{instance.image.url}'
-        return data
-        
+
 
 class Category_Type_Serializer(serializers.ModelSerializer):
     image_list = serializers.SerializerMethodField()
@@ -149,6 +131,31 @@ class Options_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Options
         fields = ["value"]
+
+class Slice_Serializer(serializers.ModelSerializer):
+    labels = Labels_Serializer(many = True)
+    options = Options_Serializer(many = True)
+    class Meta:
+        model = Slice
+        fields = "__all__"
+
+
+class Image_Serializer(serializers.ModelSerializer):
+    slice = Slice_Serializer()
+    class Meta:
+        model = Image
+        fields = ["image", "slice"]
+
+    def update(self, instance, validated_data):
+        import pdb; pdb.set_trace()
+        return super().update(instance, validated_data)
+        
+    def to_representation(self, instance):
+        data = super(Image_Serializer, self).to_representation(instance)
+        if instance.image:
+            data['image'] = f'media/{instance.image.url}'
+        return data
+
 
 class Case_Serializer(serializers.ModelSerializer):
     labels = Labels_Serializer(many = True)

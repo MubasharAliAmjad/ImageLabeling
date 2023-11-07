@@ -1,0 +1,12 @@
+<button id="test">Press me</button>
+
+<script>
+  test_btn = document.getElementById("test");
+  test_btn.addEventListener("click", test_func());
+  function test_func() {
+    fetch("http://127.0.0.1:8000/api/export_data/62/").then((response) => {
+      console.log(response);
+      
+    });
+  }
+</script>
