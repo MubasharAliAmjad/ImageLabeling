@@ -15,6 +15,8 @@ from django.core.files.storage import default_storage
 import csv
 from django.contrib.sites.shortcuts import get_current_site
 from django.views.generic import TemplateView
+from django.http import JsonResponse
+
 # Create your views here.
 
 class UnZip_View(viewsets.ViewSet):
@@ -124,11 +126,11 @@ class Export_Data_view(APIView):
         date_time = project_data.created_at.strftime("%Y-%m-%d_%H-%M")
         title = f"{project_data.project_name}-{date_time}.csv"
         
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = f'attachment; filename="{title}"'
-
-        writer = csv.writer(response)
-        writer.writerow(['Project Name', 'Question', 'Case Name', 'Notes', 'Cols Number', 'Rows Number', 'Randomize Cases', 'Random Categories', 'Labels', 'Options', 'Reference Name', 'Reference Images', 'Category', 'Type', 'Image URL', 'Created at'])
+        # response = HttpResponse(content_type='text/csv')
+        # response['Content-Disposition'] = f'attachment; filename="{title}"'
+        csv_data = []
+        csv_data.append(['Project Name', 'Question', 'Case Name', 'Notes', 'Cols Number', 'Rows Number', 'Randomize Cases', 'Random Categories', 'Labels', 'Options', 'Reference Name', 'Reference Images', 'Category', 'Type', 'Image URL', 'Created at'])
+        # writer.writerow()
         row = []
 
         for session_item in project_data.session.all():    
@@ -161,9 +163,13 @@ class Export_Data_view(APIView):
 
                     row = [project_data.project_name, project_data.question, case_item.case_name, case_item.notes, case_item.cols_number, case_item.rows_number, case_item.randomize_cases, case_item.randomize_categories, labels, options, reference_name, reference_images,category_type_item.category, category_type_item.type, category_type_images, project_data.created_at]
 
-                    writer.writerow(row)  
+                    csv_data.append(row)
 
-        return response
+        csv_text = "\n".join([",".join(map(str, row)) for row in csv_data])
+
+        # Return the CSV data as text content
+        response_data = {'csv_text': csv_text}
+        return Response(response_data)
 
 # class Slice_View(viewsets.ModelViewSet):
 #     queryset = Slice.objects.all()
