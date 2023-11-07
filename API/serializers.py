@@ -7,6 +7,7 @@ from django.core.files import File
 from django.core.files.storage import FileSystemStorage
 import copy
 from django.core.files.storage import default_storage
+import random
 
 
 class Unzip_Serializer(serializers.Serializer):
@@ -127,12 +128,12 @@ class Reference_Folder_Serializer(serializers.ModelSerializer):
 class Labels_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Labels
-        fields = ["value"]
+        fields = "__all__"
 
 class Options_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Options
-        fields = ["value"]
+        fields = "__all__"
 
 class ReferenceItemSerializer(serializers.Serializer):
     slice = serializers.IntegerField()
@@ -190,24 +191,13 @@ class Session_Serializer(serializers.ModelSerializer):
         fields = "__all__"
     
 
-# class Zip_Folder_Serializer(serializers.Serializer):
-#     zip_folder = serializers.CharField()
-
-# class Folder_Input_Serializer(serializers.Serializer):
-#     # refernece_name = serializers.CharField(max_length = 50)
-#     rows_list = serializers.ListField(max_length = 50)
-#     columns_list = serializers.ListField(max_length = 50)
 
 class Project_Serializer(serializers.ModelSerializer):
-    # folder_names = Folder_Input_Serializer(write_only = True)
     zip_folder = serializers.CharField(max_length = 150, write_only = True)
-    # cols_number = serializers.IntegerField()
-    # rows_number = serializers.IntegerField()
     rows_list = serializers.ListField(max_length = 50, write_only = True)
     columns_list = serializers.ListField(max_length = 50, write_only = True)
     session = Session_Serializer(many = True, read_only = True)
     case = Case_Serializer(many = True, write_only = True)
-    # zip_folder = Zip_Folder_Serializer(write_only = True)
     
     class Meta:
         model = Project
@@ -239,14 +229,7 @@ class Project_Serializer(serializers.ModelSerializer):
         
         zip_folder = validated_data.pop('zip_folder')
         
-        # zip_folder = zip_folder.get("zip_folder")
-
-        # user_list_folders = validated_data.pop('list_folders')
-        # user_list_folders = user_list_folders.get('list_folders') 
-        # rows_number = validated_data.pop('rows_number')
-        # cols_number = validated_data.pop('cols_number')
         rows_list = validated_data.pop('rows_list')
-        # rows_list = user_folder_names.get('rows_list') 
         columns_list = validated_data.pop('columns_list') 
         
         
@@ -258,9 +241,19 @@ class Project_Serializer(serializers.ModelSerializer):
         subfolders_path = os.path.join(zip_folder_path, subfolders_names[0])
         list_cases_in_zip = os.listdir(subfolders_path)
         
-        # sessions_data = validated_data.pop('session')
-        # session_list = []
+        
+        
         case_data_item = validated_data.pop("case")
+        
+        randomize_cases = case_data_item[0].pop('randomize_cases')
+        randomize_categories = case_data_item[0].pop('randomize_categories')
+        if randomize_cases:
+            random.shuffle(list_cases_in_zip)
+        if randomize_categories:
+            random.shuffle(rows_list)
+            random.shuffle(columns_list)
+
+        
         cols_number = case_data_item[0].get('cols_number')
         rows_number = case_data_item[0].get('rows_number')
 
@@ -271,11 +264,7 @@ class Project_Serializer(serializers.ModelSerializer):
         user_reference_folder = user_reference_folder.get("reference_name")
 
         notes = case_data_item[0].pop('notes')
-        randomize_cases = case_data_item[0].pop('randomize_cases')
-        randomize_categories = case_data_item[0].pop('randomize_categories')
 
-
-        # import pdb; pdb.set_trace()
         session_list = []
         case_list = []
         label_list = []
@@ -349,19 +338,9 @@ class Project_Serializer(serializers.ModelSerializer):
             
         session = Session.objects.create()
         
-        session.case.add(*case_list)  # Using the 'case' field name
-        #session.labels.add(*label_list)  # Using the 'labels' field name
-        # session.labels.add(*label_list)
-
-            # for case in case_list:
-            #     session.case.add(case)
-            
-            # for label in label_list:
-            #     session.labels.add(label)
+        session.case.add(*case_list)
 
         session_list.append(session)
-            #session.category.set(category_list)
-            #session.type.set(type_list)
 
         project = Project.objects.create(**validated_data)
         project.session.set(session_list)
@@ -389,44 +368,3 @@ class Project_Serializer(serializers.ModelSerializer):
             print(f"Folder '{zip_folder}' does not exist in media.")
             
         return project
-
-    # def update(self, instance, validated_data):
-    #     instance.project_name = validated_data.get('project_name', instance.project_name)
-    #     instance.question = validated_data.get('question', instance.question)
-    #     instance.save()
-    #     # You can also update the related session objects in a similar fashion
-    #     sessions_data = validated_data.pop('session')
-    #     existing_sessions = instance.session.all()        
-
-    #     for session_data_item in sessions_data:
-    #         session_id = session_data_item.get('id')
-            
-    #         if session_id:
-    #             session = existing_sessions.get(id=session_id)
-    #         else:
-    #             continue
-            
-    #         labels_data = session_data_item.pop('labels')
-    #         category_data = session_data_item.pop('category')
-    #         type_data = session_data_item.pop('type')
-    #         category_type_data = session_data_item.pop('category_type')
-    #             # Update session attributes here
-    #         # Update related fields for the session
-    #         labels = [Labels.objects.get_or_create(value=label_data['value'])[0] for label_data in labels_data]
-    #         session.labels.set(labels)
-
-    #         categories = [Category.objects.get_or_create(category_name=category_item['category_name'])[0] for category_item in category_data]
-    #         session.category.set(categories)
-
-    #         types = [Type.objects.get_or_create(type_name=type_item['type_name'])[0] for type_item in type_data]
-    #         session.type.set(types)
-
-    #         category_types = []
-    #         for category_type_item in category_type_data:
-    #             slice_data = category_type_item.pop('slice')
-    #             slice, _ = Slice.objects.get_or_create(zoom=slice_data['zoom'])
-    #             category_type, _ = Category_Type.objects.update_or_create(session=session, slice=slice, defaults=category_type_item)
-    #             category_types.append(category_type)
-
-
-    #     return instance
