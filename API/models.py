@@ -50,6 +50,8 @@ class Category_Type(models.Model):
     category = models.CharField(max_length=100)
     type = models.CharField(max_length=100)
     image = models.ManyToManyField(Image, blank=True)
+    labels = models.ManyToManyField(Labels)
+    options = models.ManyToManyField(Options)
     created_at = models.DateTimeField(auto_now_add = True)
 
     def __str__(self):
@@ -63,9 +65,6 @@ class Case(models.Model):
     rows_number =models.PositiveIntegerField()
 
     category_type = models.ManyToManyField(Category_Type, blank=True)
-
-    labels = models.ManyToManyField(Labels)
-    options = models.ManyToManyField(Options)
 
     randomize_cases = models.BooleanField(default=False)
     randomize_categories = models.BooleanField(default=False)

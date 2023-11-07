@@ -95,12 +95,22 @@ class Unzip_Serializer(serializers.Serializer):
 
 
 
+class Labels_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Labels
+        fields = "__all__"
 
+class Options_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Options
+        fields = "__all__"
 
 
 
 class Category_Type_Serializer(serializers.ModelSerializer):
     image_list = serializers.SerializerMethodField()
+    labels = Labels_Serializer(many = True, read_only = True)
+    options = Options_Serializer(many = True, read_only = True)
     class Meta:
         model = Category_Type
         fields = "__all__"
@@ -125,38 +135,47 @@ class Reference_Folder_Serializer(serializers.ModelSerializer):
             image['image'] = f"media/{image['image']}"
         return image_list
     
-class Labels_Serializer(serializers.ModelSerializer):
-    class Meta:
-        model = Labels
-        fields = "__all__"
 
-class Options_Serializer(serializers.ModelSerializer):
-    class Meta:
-        model = Options
-        fields = "__all__"
 
 class ReferenceItemSerializer(serializers.Serializer):
     slice = serializers.IntegerField()
-    opacity = serializers.CharField(allow_blank=True)
-    zoomLevel = serializers.CharField(allow_blank=True)
+    # opacity = serializers.CharField(allow_blank=True)
+    zoom_level = serializers.IntegerField()
     # timestamp = serializers.CharField(allow_blank=True)
 
-class Slice_Serializer(serializers.ModelSerializer):
-    reference = ReferenceItemSerializer(many=True)
-    labels = Labels_Serializer(many = True)
+class CategoryTypeItemSerializer(serializers.Serializer):
+    obj_id = serializers.IntegerField()
+    slice = serializers.IntegerField()
+    zoom_level = serializers.IntegerField()
     options = Options_Serializer(many = True)
+    labels = Labels_Serializer(many = True)
+
+class Slice_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Slice
         fields = "__all__"
 
 
 
+class Image_Serializer(serializers.Serializer):
+    # reference = ReferenceItemSerializer(many=True)
+    category_type = CategoryTypeItemSerializer(many = True)
 
-# class Image_Serializer(serializers.ModelSerializer):
-#     slice = Slice_Serializer()
-#     class Meta:
-#         model = Image
-#         fields = ["image", "slice"]
+
+    def create(self, validated_data):
+        reference_data = validated_data.pop('reference')
+        
+        reference_slice_id = reference_data[0].get("slice")
+        reference_slice_zoom = reference_data[0].get("zoom_level")
+        slice_obj = Slice.objects.create(zoom = reference_slice_zoom)
+        image_obj = Image.objects.get(id = reference_slice_id)
+        image_obj.slice = slice_obj
+        image_obj.save()
+
+        # user_reference_folder = user_reference_folder.get("reference_name")
+        category_type_data = validated_data.pop('category_type')
+        import pdb; pdb.set_trace()
+        return image_obj
 
 #     def update(self, instance, validated_data):
 
@@ -173,10 +192,10 @@ class Slice_Serializer(serializers.ModelSerializer):
 
 
 class Case_Serializer(serializers.ModelSerializer):
-    labels = Labels_Serializer(many = True)
-    options = Options_Serializer(many = True)
     category_type = Category_Type_Serializer(many = True, read_only=True)
     reference_folder = Reference_Folder_Serializer()
+    labels = Labels_Serializer(many = True, write_only = True)
+    options = Options_Serializer(many = True, write_only = True)
     class Meta:
         model = Case
         fields = "__all__"
@@ -269,19 +288,20 @@ class Project_Serializer(serializers.ModelSerializer):
         case_list = []
         label_list = []
         option_list = []
-        for case in list_cases_in_zip:
-            if not os.path.isdir(os.path.join(subfolders_path, case)):
-                continue
-            list_folders_in_zip = self.find_list_folders(subfolders_path)
-            
-            for label_data in labels_data:
+
+        for label_data in labels_data:
                 label, _ = Labels.objects.get_or_create(value=label_data['value'])
                 label_list.append(label)
 
-            for option_data in options_data:
-                option, _ = Options.objects.get_or_create(value=option_data['value'])
-                option_list.append(option)
+        for option_data in options_data:
+            option, _ = Options.objects.get_or_create(value=option_data['value'])
+            option_list.append(option)
 
+        for case in list_cases_in_zip:
+            if not os.path.isdir(os.path.join(subfolders_path, case)):
+                continue
+
+            list_folders_in_zip = self.find_list_folders(subfolders_path)
             images_and_path = self.find_images(list_cases_in_zip, subfolders_path, user_reference_folder)
             
             reference_obj = Reference_Folder.objects.create(reference_name = user_reference_folder)
@@ -295,8 +315,7 @@ class Project_Serializer(serializers.ModelSerializer):
                             
             case_obj = Case.objects.create(case_name = case, notes = notes, cols_number = cols_number, rows_number = rows_number, randomize_cases = randomize_cases, randomize_categories = randomize_categories, reference_folder = reference_obj)
 
-            case_obj.labels.set(label_list)
-            case_obj.options.set(option_list)
+            
 
             category_type_list = []
             for row_data in rows_list:
@@ -307,6 +326,8 @@ class Project_Serializer(serializers.ModelSerializer):
 
                         images_and_path = self.find_images(list_cases_in_zip, subfolders_path, file_folder)
                         category_type = Category_Type.objects.create(category = row_data, type = column_data)
+                        category_type.labels.set(label_list)
+                        category_type.options.set(option_list)
                         for image in images_and_path.get("list_images"):
                             file_path = os.path.join(images_and_path.get("image_folder_path"), image)
                             dicom_file = open(file_path, "rb")
@@ -321,7 +342,9 @@ class Project_Serializer(serializers.ModelSerializer):
 
                         images_and_path = self.find_images(list_cases_in_zip, subfolders_path, file_folder)
                         category_type = Category_Type.objects.create(category = column_data, type = row_data)
-
+                        category_type.labels.set(label_list)
+                        category_type.options.set(option_list)
+                        
                         for image in images_and_path.get("list_images"):
                             file_path = os.path.join(images_and_path.get("image_folder_path"), image)
                             dicom_file = open(file_path, "rb")
@@ -332,6 +355,8 @@ class Project_Serializer(serializers.ModelSerializer):
                         category_type_list.append(category_type)
                     else:
                         category_type = Category_Type.objects.create(category = column_data, type = row_data)
+                        category_type.labels.set(label_list)
+                        category_type.options.set(option_list)
                         category_type_list.append(category_type)
                     case_obj.category_type.set(category_type_list)
                     case_list.append(case_obj)

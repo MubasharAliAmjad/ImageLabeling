@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.response import Response
 from .models import Slice, Category_Type, Labels, Session, Project, Image, ZipFile
-from .serializers import Slice_Serializer, Category_Type_Serializer, Labels_Serializer, Session_Serializer, Project_Serializer, Unzip_Serializer
+from .serializers import Slice_Serializer, Image_Serializer, Category_Type_Serializer, Labels_Serializer, Session_Serializer, Project_Serializer, Unzip_Serializer
 from rest_framework import viewsets
 from rest_framework import status
 from django.http import HttpResponse
@@ -116,9 +116,9 @@ class Project_View(viewsets.ModelViewSet):
     permission_classes = [CustomPermission]
 
 
-# class Image_View(viewsets.ModelViewSet):
-#     queryset = Image.objects.all()
-#     serializer_class = Image_Serializer
+class Image_View(viewsets.ModelViewSet):
+    queryset = Image.objects.all()
+    serializer_class = Image_Serializer
 
 class Export_Data_view(APIView):
     def get(self,request, id):
