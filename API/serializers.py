@@ -158,7 +158,7 @@ class Slice_Serializer(serializers.ModelSerializer):
 
 
 class Image_Serializer(serializers.Serializer):
-    # reference = ReferenceItemSerializer(many=True)
+    reference = ReferenceItemSerializer(many=True)
     category_type = CategoryTypeItemSerializer(many = True)
 
 
@@ -314,7 +314,7 @@ class Project_Serializer(serializers.ModelSerializer):
                         dicom_file.close()
                             
             case_obj = Case.objects.create(case_name = case, notes = notes, cols_number = cols_number, rows_number = rows_number, randomize_cases = randomize_cases, randomize_categories = randomize_categories, reference_folder = reference_obj)
-
+            case_obj.labels.set(label_list)
             
 
             category_type_list = []
@@ -326,7 +326,6 @@ class Project_Serializer(serializers.ModelSerializer):
 
                         images_and_path = self.find_images(list_cases_in_zip, subfolders_path, file_folder)
                         category_type = Category_Type.objects.create(category = row_data, type = column_data)
-                        category_type.labels.set(label_list)
                         category_type.options.set(option_list)
                         for image in images_and_path.get("list_images"):
                             file_path = os.path.join(images_and_path.get("image_folder_path"), image)
@@ -355,7 +354,6 @@ class Project_Serializer(serializers.ModelSerializer):
                         category_type_list.append(category_type)
                     else:
                         category_type = Category_Type.objects.create(category = column_data, type = row_data)
-                        category_type.labels.set(label_list)
                         category_type.options.set(option_list)
                         category_type_list.append(category_type)
                     case_obj.category_type.set(category_type_list)
