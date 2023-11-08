@@ -201,15 +201,6 @@ class customSliceSerializer(serializers.Serializer):
         # import pdb; pdb.set_trace()
         
         return session_obj
-
-            
-            
-        return ""
-        return ParentModel.objects.create(
-            field1=validated_data['field1'],
-            field2=validated_data['field2'],
-            **validated_data['child_model']
-        )
     
     
 

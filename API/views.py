@@ -145,7 +145,7 @@ class Export_Data_view(APIView):
             date_time = slice_item.created_at.strftime("%Y-%m-%d_%H-%M")
             # category_type = f"{category_type_item.category}_{category_type_item.type}"
             # import pdb;pdb.set_trace()
-            row = [slice_item.project_name, id, slice_item.case_name, date_time, slice_item.category_type_name, slice_item.image_id, slice_item.labels, slice_item.options]
+            row = [slice_item.project_name, id, slice_item.case_name, date_time, slice_item.category_type_name, slice_item.image_id, slice_item.score, slice_item.labels, slice_item.options]
 
             csv_data.append(row)
 
