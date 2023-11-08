@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.response import Response
 from .models import Slice, Category_Type, Labels, Session, Project, Image, ZipFile
-from .serializers import Slice_Serializer, Image_Serializer, Category_Type_Serializer, Labels_Serializer, Session_Serializer, Project_Serializer, Unzip_Serializer
+from .serializers import Slice_Serializer, Image_Serializer, Category_Type_Serializer, Labels_Serializer, Session_Serializer, Project_Serializer, Unzip_Serializer, customSliceSerializer
 from rest_framework import viewsets
 from rest_framework import status
 from django.http import HttpResponse
@@ -16,6 +16,7 @@ import csv
 from django.contrib.sites.shortcuts import get_current_site
 from django.views.generic import TemplateView
 from django.http import JsonResponse
+from rest_framework import generics
 
 # Create your views here.
 
@@ -169,6 +170,9 @@ class Export_Data_view(APIView):
 #     queryset = Labels.objects.all()
 #     serializer_class = Labels_Serializer
 
-class Session_View(viewsets.ModelViewSet):
-    queryset = Session.objects.all()
-    serializer_class = Session_Serializer
+# class Session_View(viewsets.ModelViewSet):
+#     queryset = Session.objects.all()
+#     serializer_class = Session_Serializer
+
+class customSliceView(generics.CreateAPIView):
+    serializer_class = customSliceSerializer

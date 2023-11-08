@@ -142,8 +142,6 @@ class ReferenceItemSerializer(serializers.Serializer):
     # opacity = serializers.CharField(allow_blank=True)
     zoom_level = serializers.IntegerField()
     options = Options_Serializer(many = True)
-    
-    # timestamp = serializers.CharField(allow_blank=True)
 
 class CategoryTypeItemSerializer(serializers.Serializer):
     obj_id = serializers.IntegerField()
@@ -156,7 +154,6 @@ class Slice_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Slice
         fields = "__all__"
-
 
 
 class Image_Serializer(serializers.Serializer):
@@ -176,21 +173,12 @@ class Image_Serializer(serializers.Serializer):
 
         # user_reference_folder = user_reference_folder.get("reference_name")
         category_type_data = validated_data.pop('category_type')
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         return image_obj
 
-#     def update(self, instance, validated_data):
-
-#         import pdb; pdb.set_trace()
-        
-
-#         return super().update(instance, validated_data)
-        
-#     def to_representation(self, instance):
-#         data = super(Image_Serializer, self).to_representation(instance)
-#         if instance.image:
-#             data['image'] = f'media/{instance.image.url}'
-#         return data
+class customSliceSerializer(serializers.Serializer):
+    reference = ReferenceItemSerializer()
+    name = serializers.CharField()
 
 
 class Case_Serializer(serializers.ModelSerializer):
@@ -289,7 +277,7 @@ class Project_Serializer(serializers.ModelSerializer):
         case_list = []
         label_list = []
         option_list = []
-
+        import pdb; pdb.set_trace()
         for label_data in labels_data:
                 label, _ = Labels.objects.get_or_create(value=label_data['value'])
                 label_list.append(label)
@@ -342,7 +330,7 @@ class Project_Serializer(serializers.ModelSerializer):
 
                         images_and_path = self.find_images(list_cases_in_zip, subfolders_path, file_folder)
                         category_type = Category_Type.objects.create(category = column_data, type = row_data)
-                        category_type.labels.set(label_list)
+                        # category_type.labels.set(label_list)
                         category_type.options.set(option_list)
                         
                         for image in images_and_path.get("list_images"):

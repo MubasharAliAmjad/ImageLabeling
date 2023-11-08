@@ -10,7 +10,8 @@ router = DefaultRouter()
 # router.register(r'category', views.Category_View, basename='category')
 # router.register(r'category_type', views.Category_Type_View, basename='category_type')
 # router.register(r'labels', views.Labels_View, basename='labels')
-router.register(r'session', views.Session_View, basename='session')
+# router.register(r'session', views.Session_View, basename='session')
+# router.register(r'slice', views.customSliceView, basename='slice')
 router.register(r'project', views.Project_View, basename='project')
 router.register(r'unzip', views.UnZip_View, basename='unzip')
 
@@ -19,6 +20,7 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),    
     path('', include(router.urls)),
     path('read_local/', views.ReadFromLocal.as_view()),
+    path('slice/', views.customSliceView.as_view()),
     path('export_data/<int:id>/', views.Export_Data_view.as_view()),
     # path('index/', views.index, name="index"),
     # path('dashboard/', views.dashboard, name="dashboard"),
