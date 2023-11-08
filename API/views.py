@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from .models import Slice, Category_Type, Labels, Session, Project, Image, ZipFile
-from .serializers import Slice_Serializer, Image_Serializer, Category_Type_Serializer, Labels_Serializer, Session_Serializer, Project_Serializer, Unzip_Serializer, customSliceSerializer
+from .models import Slice, Category_Type, Labels, Session, Project, Image, ZipFile, SliceSession
+from .serializers import Slice_Serializer, Category_Type_Serializer, Labels_Serializer, Session_Serializer, Project_Serializer, Unzip_Serializer, customSliceSerializer
 from rest_framework import viewsets
 from rest_framework import status
 from django.http import HttpResponse
@@ -117,32 +117,37 @@ class Project_View(viewsets.ModelViewSet):
     permission_classes = [CustomPermission]
 
 
-class Image_View(viewsets.ModelViewSet):
-    queryset = Image.objects.all()
-    serializer_class = Image_Serializer
+# class Image_View(viewsets.ModelViewSet):
+#     queryset = Image.objects.all()
+#     serializer_class = Image_Serializer
 
 class Export_Data_view(APIView):
     def get(self,request, id):
-        project_data = Project.objects.get(id = id)
-        date_time = project_data.created_at.strftime("%Y-%m-%d_%H-%M")
-        title = f"{project_data.project_name}-{date_time}.csv"
         
-        # response = HttpResponse(content_type='text/csv')
-        # response['Content-Disposition'] = f'attachment; filename="{title}"'
+        session_data = SliceSession.objects.get(id = id)
+        slice_data = session_data.slice.all()
+        project_name = slice_data[0].project_name
+        date_time = slice_data[0].created_at.strftime("%Y-%m-%d_%H-%M")
+        # import pdb; pdb.set_trace()
+        
+        
+        title = f"{project_name}-{date_time}.csv"
+        # title = "testing"
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{title}"'
         csv_data = []
-        csv_data.append(['Project Id', 'Session Id', 'Case Id', 'TimeStamp', 'Category_Type', 'Slice Id', 'Score'])
+        csv_data.append(['Project Name', 'Session Name', 'Case Name', 'TimeStamp', 'Category_Type', 'Slice Id', 'Score', 'Labels', 'Options'])
         # writer.writerow()
         row = []
 
-        for session_item in project_data.session.all():    
-            for case_item in session_item.case.all():
-                
-                for category_type_item in case_item.category_type.all():
-                    category_type = f"{category_type_item.category}_{category_type_item.type}"
+        for slice_item in slice_data:
+            import pdb; pdb.set_trace()
+            date_time = slice_item.created_at.strftime("%Y-%m-%d_%H-%M")
+            # category_type = f"{category_type_item.category}_{category_type_item.type}"
+            # import pdb;pdb.set_trace()
+            row = [slice_item.project_name, id, slice_item.case_name, date_time, slice_item.category_type_name, slice_item.image_id, slice_item.labels, slice_item.options]
 
-                    row = [project_data.id, session_item.id, case_item.id, project_data.created_at, category_type, "Nill", "Nill"]
-
-                    csv_data.append(row)
+            csv_data.append(row)
 
         csv_text = "\n".join([",".join(map(str, row)) for row in csv_data])
 
@@ -174,5 +179,14 @@ class Export_Data_view(APIView):
 #     queryset = Session.objects.all()
 #     serializer_class = Session_Serializer
 
-class customSliceView(generics.CreateAPIView):
-    serializer_class = customSliceSerializer
+class customSliceView(APIView):
+    def post(self, request):
+        # Create an instance of the customSliceSerializer
+        serializer = customSliceSerializer(data=request.data)
+
+        # Validate and save the data
+        if serializer.is_valid():
+            session_obj = serializer.save()
+            # You can also do additional processing here if needed
+            return Response({'session_obj_id': session_obj.id}, status=201)  # Return the session_obj or its ID as a response
+        return Response(serializer.errors, status=400)  # Return validation errors

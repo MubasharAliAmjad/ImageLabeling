@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Slice, Image, Category_Type, Labels, Session, Project, Case, Reference_Folder, Options, ZipFile
+from .models import Slice, Image, Category_Type, Labels, Session, Project, Case, Reference_Folder, Options, ZipFile, SliceSession
 import uuid
 from django.conf import settings
 import os, zipfile
@@ -137,11 +137,7 @@ class Reference_Folder_Serializer(serializers.ModelSerializer):
     
 
 
-class ReferenceItemSerializer(serializers.Serializer):
-    slice = serializers.IntegerField()
-    # opacity = serializers.CharField(allow_blank=True)
-    zoom_level = serializers.IntegerField()
-    options = Options_Serializer(many = True)
+
 
 class CategoryTypeItemSerializer(serializers.Serializer):
     obj_id = serializers.IntegerField()
@@ -155,30 +151,79 @@ class Slice_Serializer(serializers.ModelSerializer):
         model = Slice
         fields = "__all__"
 
-
-class Image_Serializer(serializers.Serializer):
-    
-    category_type = CategoryTypeItemSerializer(many = True)
-
-
-    def create(self, validated_data):
-        reference_data = validated_data.pop('reference')
+class  Slice_Fields_Serializer(serializers.Serializer):
+    project_id = serializers.IntegerField(write_only = True)
+    # session_id = models.PositiveBigIntegerField()
+    case_id = serializers.IntegerField(write_only = True)
+    category_type = serializers.IntegerField(write_only = True)
+    image_id = serializers.IntegerField(write_only = True)
+    labels = serializers.ListField(write_only = True)
+    options = serializers.ListField(write_only = True)
+    score = serializers.IntegerField(write_only = True)
         
-        reference_slice_id = reference_data[0].get("slice")
-        reference_slice_zoom = reference_data[0].get("zoom_level")
-        slice_obj = Slice.objects.create(zoom = reference_slice_zoom)
-        image_obj = Image.objects.get(id = reference_slice_id)
-        image_obj.slice = slice_obj
-        image_obj.save()
-
-        # user_reference_folder = user_reference_folder.get("reference_name")
-        category_type_data = validated_data.pop('category_type')
-        # import pdb; pdb.set_trace()
-        return image_obj
 
 class customSliceSerializer(serializers.Serializer):
-    reference = ReferenceItemSerializer()
-    name = serializers.CharField()
+    slices = Slice_Serializer(many = True, read_only = True)
+    slices_data = Slice_Fields_Serializer(many = True, write_only = True)
+    
+    
+    def create(self, validated_data):
+        
+        slices = validated_data.pop("slices_data")
+        session_obj = SliceSession.objects.create()
+        project_obj = Project.objects.get(id = slices[0]["project_id"])
+        slice_list = []
+        for slice in slices:
+
+            options = ""
+            for op in slice["options"]:
+                options = op + "," + options
+                
+            labels = ""
+            for lab in slice["labels"]:
+                labels = lab + "," + labels
+            
+            project_obj = Project.objects.get(id = slice["project_id"])
+            case_obj = Case.objects.get(id = slice["case_id"])
+            category_type_obj = Category_Type.objects.get(id = slice["category_type"])
+            category_type_name = f"{category_type_obj.category}_{category_type_obj.type}"
+
+            slice_obj = Slice.objects.create(project_name = project_obj.project_name, case_name = case_obj.case_name, category_type_name = category_type_name, image_id = slice["image_id"], labels = labels, options = options, score = slice["score"])
+            slice_list.append(slice_obj)
+        
+        session_list = project_obj.sliceSession.all()
+        session_list = list(session_list)
+        session_obj.slice.set(slice_list)
+        session_obj.save()
+        session_list.append(session_obj)
+        
+        project_obj.sliceSession.set(session_list)
+        # import pdb; pdb.set_trace()
+        
+        return session_obj
+
+            
+            
+        return ""
+        return ParentModel.objects.create(
+            field1=validated_data['field1'],
+            field2=validated_data['field2'],
+            **validated_data['child_model']
+        )
+    
+    
+
+    # reference_data = validated_data.pop('reference')
+        
+    #     reference_slice_id = reference_data[0].get("slice")
+    #     reference_slice_zoom = reference_data[0].get("zoom_level")
+    #     slice_obj = Slice.objects.create(zoom = reference_slice_zoom)
+    #     image_obj = Image.objects.get(id = reference_slice_id)
+    #     image_obj.slice = slice_obj
+    #     image_obj.save()
+
+    #     # user_reference_folder = user_reference_folder.get("reference_name")
+    #     category_type_data = validated_data.pop('category_type')  
 
 
 class Case_Serializer(serializers.ModelSerializer):

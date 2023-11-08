@@ -23,15 +23,24 @@ class Options(models.Model):
         return self.value
 
 class Slice(models.Model):
-    zoom = models.PositiveIntegerField(default=0)
+    project_name = models.CharField(max_length=200)
+    # session_id = models.PositiveBigIntegerField()
+    case_name = models.CharField(max_length=200)
+    category_type_name = models.CharField(max_length=200)
+    image_id = models.PositiveIntegerField(default=0)
+    labels = models.CharField(max_length=500)
+    options = models.CharField(max_length=500)
+    score = models.IntegerField(default=0)
     # opacity = models.PositiveIntegerField(default=0)
-    # created_at = models.DateTimeField(auto_now_add = True)
+    created_at = models.DateTimeField(auto_now_add = True)
     # options = models.ManyToManyField(Options)
     # labels = models.ManyToManyField(Labels)
 
+class SliceSession(models.Model):
+    slice = models.ManyToManyField(Slice)
+
 class Image(models.Model):
     image = models.ImageField(upload_to='API/dicom_images/')
-    slice = models.ForeignKey(Slice, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         # f'media/{instance.image.url}'
@@ -51,6 +60,7 @@ class Category_Type(models.Model):
     type = models.CharField(max_length=100)
     image = models.ManyToManyField(Image, blank=True)
     options = models.ManyToManyField(Options)
+    # slice = models.ManyToManyField(Slice,  default=0, blank=True)
     created_at = models.DateTimeField(auto_now_add = True)
 
     def __str__(self):
@@ -88,6 +98,7 @@ class Project(models.Model):
     question = models.CharField(max_length=255)
     session = models.ManyToManyField(Session, blank=True)
     created_at = models.DateTimeField(auto_now_add = True)
+    sliceSession = models.ManyToManyField(SliceSession, blank=True)
 
     def __str__(self):
         return self.project_name
