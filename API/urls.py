@@ -4,8 +4,8 @@ from  rest_framework.routers import DefaultRouter
 from .swagger_config import schema_view
 
 router = DefaultRouter()
-router.register(r'image', views.Image_View, basename='image')
-router.register(r'slice', views.Slice_View, basename='slice')
+# router.register(r'image', views.Image_View, basename='image')
+# router.register(r'slice', views.Slice_View, basename='slice')
 # router.register(r'type', views.Type_View, basename='type')
 # router.register(r'category', views.Category_View, basename='category')
 # router.register(r'category_type', views.Category_Type_View, basename='category_type')
@@ -20,7 +20,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('read_local/', views.ReadFromLocal.as_view()),
     path('export_data/<int:id>/', views.Export_Data_view.as_view()),
-    path('csv_test', views.CSVTestView.as_view()),
     # path('index/', views.index, name="index"),
     # path('dashboard/', views.dashboard, name="dashboard"),
     # path('test/', views.test, name="test"),

@@ -149,9 +149,9 @@ class Export_Data_view(APIView):
         response_data = {'csv_text': csv_text}
         return Response(response_data)
 
-class Slice_View(viewsets.ModelViewSet):
-    queryset = Slice.objects.all()
-    serializer_class = Slice_Serializer
+# class Slice_View(viewsets.ModelViewSet):
+#     queryset = Slice.objects.all()
+#     serializer_class = Slice_Serializer
 
 # class Type_View(viewsets.ModelViewSet):
 #     queryset = Type.objects.all()
@@ -172,6 +172,3 @@ class Slice_View(viewsets.ModelViewSet):
 class Session_View(viewsets.ModelViewSet):
     queryset = Session.objects.all()
     serializer_class = Session_Serializer
-
-class CSVTestView(TemplateView):
-    template_name = 'test.html'

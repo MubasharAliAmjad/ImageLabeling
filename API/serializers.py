@@ -141,13 +141,15 @@ class ReferenceItemSerializer(serializers.Serializer):
     slice = serializers.IntegerField()
     # opacity = serializers.CharField(allow_blank=True)
     zoom_level = serializers.IntegerField()
+    options = Options_Serializer(many = True)
+    
     # timestamp = serializers.CharField(allow_blank=True)
 
 class CategoryTypeItemSerializer(serializers.Serializer):
     obj_id = serializers.IntegerField()
     slice = serializers.IntegerField()
     zoom_level = serializers.IntegerField()
-    options = Options_Serializer(many = True)
+    options = Options_Serializer(many = True, write_only = True)
     labels = Labels_Serializer(many = True)
 
 class Slice_Serializer(serializers.ModelSerializer):
@@ -158,7 +160,7 @@ class Slice_Serializer(serializers.ModelSerializer):
 
 
 class Image_Serializer(serializers.Serializer):
-    reference = ReferenceItemSerializer(many=True)
+    
     category_type = CategoryTypeItemSerializer(many = True)
 
 
@@ -194,7 +196,7 @@ class Image_Serializer(serializers.Serializer):
 class Case_Serializer(serializers.ModelSerializer):
     category_type = Category_Type_Serializer(many = True, read_only=True)
     reference_folder = Reference_Folder_Serializer()
-    labels = Labels_Serializer(many = True, write_only = True)
+    labels = Labels_Serializer(many = True)
     options = Options_Serializer(many = True, write_only = True)
     class Meta:
         model = Case
@@ -250,7 +252,6 @@ class Project_Serializer(serializers.ModelSerializer):
         
         rows_list = validated_data.pop('rows_list')
         columns_list = validated_data.pop('columns_list') 
-        
         
         zip_folder_path = os.path.join(settings.MEDIA_ROOT, zip_folder)
         subfolders_names = os.listdir(zip_folder_path)
@@ -357,6 +358,7 @@ class Project_Serializer(serializers.ModelSerializer):
                         category_type.options.set(option_list)
                         category_type_list.append(category_type)
                     case_obj.category_type.set(category_type_list)
+                    case_obj.save()
                     case_list.append(case_obj)
             
         session = Session.objects.create()
