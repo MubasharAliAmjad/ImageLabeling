@@ -141,7 +141,7 @@ class Export_Data_view(APIView):
         row = []
 
         for slice_item in slice_data:
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             date_time = slice_item.created_at.strftime("%Y-%m-%d_%H-%M")
             # category_type = f"{category_type_item.category}_{category_type_item.type}"
             # import pdb;pdb.set_trace()

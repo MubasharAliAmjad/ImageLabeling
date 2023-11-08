@@ -322,7 +322,7 @@ class Project_Serializer(serializers.ModelSerializer):
         case_list = []
         label_list = []
         option_list = []
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         for label_data in labels_data:
                 label, _ = Labels.objects.get_or_create(value=label_data['value'])
                 label_list.append(label)
