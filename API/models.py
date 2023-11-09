@@ -24,17 +24,13 @@ class Options(models.Model):
 
 class Slice(models.Model):
     project_name = models.CharField(max_length=200)
-    # session_id = models.PositiveBigIntegerField()
     case_name = models.CharField(max_length=200)
     category_type_name = models.CharField(max_length=200)
     image_id = models.PositiveIntegerField(default=0)
     labels = models.CharField(max_length=500)
     options = models.CharField(max_length=500)
     score = models.IntegerField(default=0)
-    # opacity = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add = True)
-    # options = models.ManyToManyField(Options)
-    # labels = models.ManyToManyField(Labels)
 
 class SliceSession(models.Model):
     slice = models.ManyToManyField(Slice)
@@ -54,13 +50,11 @@ class Reference_Folder(models.Model):
         return self.reference_name
 
 
-
 class Category_Type(models.Model):
     category = models.CharField(max_length=100)
     type = models.CharField(max_length=100)
     image = models.ManyToManyField(Image, blank=True)
     options = models.ManyToManyField(Options)
-    # slice = models.ManyToManyField(Slice,  default=0, blank=True)
     created_at = models.DateTimeField(auto_now_add = True)
 
     def __str__(self):
@@ -77,7 +71,6 @@ class Case(models.Model):
     labels = models.ManyToManyField(Labels)
     randomize_cases = models.BooleanField(default=False)
     randomize_categories = models.BooleanField(default=False)
-    # after removing migrations then change null attribute
     reference_folder = models.ForeignKey(Reference_Folder, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
@@ -85,10 +78,7 @@ class Case(models.Model):
 
 class Session(models.Model):
     case = models.ManyToManyField(Case)
-    # row_data = models.
     created_at = models.DateTimeField(auto_now_add = True)
-    # category = models.ManyToManyField(Category)
-    # type = models.ManyToManyField(Type)
 
     def __str__(self):
         return f"sesion {self.id}"
@@ -102,10 +92,6 @@ class Project(models.Model):
 
     def __str__(self):
         return self.project_name
-    # Folder Reference
-    # ref_path = models.CharField(max_length=255)
-    # Meaning of layout is not confirmed yet
-    # layout = models.CharField(max_length=10)
 
 @receiver(pre_delete, sender = Image)
 def delete_image_file(sender, instance, **kwargs):
