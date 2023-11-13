@@ -118,6 +118,7 @@ class ExportDataview(APIView):
                     options = option.value + options
 
                 date_time = session.created_at.strftime("%Y-%m-%d_%H-%M")
+                
                 row = [project_name, session.session_name, case.case_name, date_time, f"{row.category}__{row.type}", row.image_id, row.score, label_string, options]
 
                 csv_data.append(row)

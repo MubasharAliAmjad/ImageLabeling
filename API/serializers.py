@@ -175,51 +175,80 @@ class CaseSerializer(serializers.ModelSerializer):
 
 class SessionSerializer(serializers.ModelSerializer):
     case = CaseSerializer(many = True, read_only = True)
-    slices_data = Slice_Fields_Serializer(many = True, write_only = True)
+    id = serializers.IntegerField()
+    # slices_data = Slice_Fields_Serializer(many = True, write_only = True)
     # session_name = serializers.CharField(max_length = 200, write_only = True)
     class Meta:
         model = Session
-        fields = ['id', 'slices_data', 'case', "session_name"]
+        fields = ["id", "session_name", "created_at", "case"]
 
     
     def create(self, validated_data):
         
         try:
-            slices = validated_data.pop("slices_data")
-            session_obj = SliceSession.objects.create()
-            
-            project_obj = Project.objects.get(id = slices[0]["project_id"])
-            session_name = validated_data.pop("session_name")
+            session_id = validated_data.pop('id')
+            session_name = validated_data.pop('session_name')
 
-            case_obj = Case.objects.get(id = slices[0]["case_id"])
-            labels = case_obj.labels
-            labels = list(labels.all())
-            reference_obj = case_obj.reference_folder
-            new_reference_instance = reference_obj.clone()
-            new_case_obj = Case.objects.create(case_name = case_obj.case_name, notes = case_obj.notes, cols_number = case_obj.cols_number, rows_number = case_obj.rows_number, randomize_cases = case_obj.randomize_cases, randomize_categories = case_obj.randomize_categories, reference_folder = new_reference_instance)
-            new_case_obj.labels.set(labels)
-            category_type_list = []
+            existing_session = Session.objects.get(id = session_id)
+
+            new_session = Session.objects.create(session_name = session_name)
+
             case_list = []
-            for slice in slices:
-                option_list = []
-                for option_data in slice["options"]:
-                    option, _ = Options.objects.get_or_create(value=option_data)
-                    option_list.append(option)
+            for case in existing_session.case.all():
+                
+                category_type_list = []
+                for category_type_item in case.category_type.all():
+                    category_type = Category_Type.objects.create(category = category_type_item.category, type = category_type_item.type)
+                    image_list = []
+                    for image in category_type_item.image.all():
+                        
+                        image_obj = Image(image = image.image)
+                        image_obj.save()
+                        category_type.image.add(image)
 
-                category_type_obj = Category_Type.objects.get(id = slice["category_type"])
-                new_category_type = Category_Type.objects.create(category = category_type_obj.category, type = category_type_obj.type, score = slice["score"])
-                new_category_type.options.set(option_list)
-                image_obj = Image.objects.get(id = slice["image_id"])
-                new_image = Image.objects.create(image  = image_obj.image)
-                new_category_type.image.add(new_image)
-                category_type_list.append(new_category_type)
-            new_case_obj.category_type.set(category_type_list)
-            new_case_obj.save()
-            case_list.append(new_case_obj)
-            session = Session.objects.create(session_name = session_name)
-            session.case.add(*case_list)
-            project_obj.session.add(session)
-            return session
+                    option_list = []
+                    for option in category_type_item.options.all():
+                        option_obj = Options(value = option.value)
+                        option_obj.save()
+                        option_list.append(option_obj)
+
+                    category_type.options.set(option_list)
+                    category_type_list.append(category_type)
+
+                label_list = []
+                for label in case.labels.all():
+                    label_obj = Labels(value = label.value)
+                    label_obj.save()
+                    label_list.append(label_obj)
+
+                reference_obj = Reference_Folder.objects.create(reference_name = case.reference_folder.reference_name)
+                for image in reference_obj.image.all():
+                    image_obj = Image(image = image)
+                    image_obj.save()
+                    reference_obj.image.add(image)
+                
+                case_obj = Case.objects.create(case_name = case.case_name, notes = case.notes, cols_number = case.cols_number, rows_number = case.rows_number, reference_folder = reference_obj)
+                case_obj.labels.set(label_list)
+                case_obj.category_type.set(category_type_list)
+                case_obj.save()
+                case_list.append(case_obj)
+
+            new_session.case.add(*case_list)
+
+            
+            projects_related_to_session = existing_session.project_set.all()
+        
+            session_list = projects_related_to_session[0].session.all()
+            session_list = list(session_list)
+            session_list.append(new_session)
+            projects_related_to_session[0].session.set(session_list)
+
+            return new_session
+
+                
+                    
+                    
+
 
                 
                 
