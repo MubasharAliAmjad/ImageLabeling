@@ -67,6 +67,7 @@ class Category_Type(models.Model):
     type = models.CharField(max_length=100)
     image = models.ManyToManyField(Image, blank=True)
     options = models.ManyToManyField(Options)
+    score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add = True)
 
     def __str__(self):
@@ -78,7 +79,6 @@ class Case(models.Model):
     notes = models.TextField(blank=True)
     cols_number = models.PositiveIntegerField()
     rows_number =models.PositiveIntegerField()
-
     category_type = models.ManyToManyField(Category_Type, blank=True)
     labels = models.ManyToManyField(Labels)
     randomize_cases = models.BooleanField(default=False)

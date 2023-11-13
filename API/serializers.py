@@ -179,7 +179,7 @@ class SessionSerializer(serializers.ModelSerializer):
     session_name = serializers.CharField(max_length = 200, write_only = True)
     class Meta:
         model = Session
-        fields = ['slices_data', 'case',"session_name"]
+        fields = ['id', 'slices_data', 'case',"session_name"]
 
     
     def create(self, validated_data):
@@ -207,7 +207,7 @@ class SessionSerializer(serializers.ModelSerializer):
                     option_list.append(option)
 
                 category_type_obj = Category_Type.objects.get(id = slice["category_type"])
-                new_category_type = Category_Type.objects.create(category = category_type_obj.category, type = category_type_obj.type)
+                new_category_type = Category_Type.objects.create(category = category_type_obj.category, type = category_type_obj.type, score = slice["score"])
                 new_category_type.options.set(option_list)
                 image_obj = Image.objects.get(id = slice["image_id"])
                 new_image = Image.objects.create(image  = image_obj.image)

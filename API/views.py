@@ -91,11 +91,12 @@ class SessionView(viewsets.ModelViewSet):
 class ExportDataview(APIView):
     def get(self,request, id):
         
-        session_data = SliceSession.objects.get(id = id)
-        slice_data = session_data.slice.all()
-        project_name = slice_data[0].project_name
-        date_time = slice_data[0].created_at.strftime("%Y-%m-%d_%H-%M")
+        session = Session.objects.get(id = id)
+        projects_related_to_session = session.project_set.all()
         
+        project_name = projects_related_to_session[0].project_name
+        import pdb; pdb.set_trace()
+        date_time = session.created_at.strftime("%Y-%m-%d_%H-%M")
         
         title = f"{project_name}-{date_time}.csv"
         response = HttpResponse(content_type='text/csv')
@@ -104,11 +105,20 @@ class ExportDataview(APIView):
         csv_data.append(['Project Name', 'Session Name', 'Case Name', 'TimeStamp', 'Category_Type', 'Slice Id', 'Score', 'Labels', 'Options'])
         row = []
 
-        for slice_item in slice_data:
-            date_time = slice_item.created_at.strftime("%Y-%m-%d_%H-%M")
-            row = [slice_item.project_name, id, slice_item.case_name, date_time, slice_item.category_type_name, slice_item.image_id, slice_item.score, slice_item.labels, slice_item.options]
+        for case in session.case.all():
+            labels = ""
+            for label in case.labels.all():
+                labels = label + "," + labels
 
-            csv_data.append(row)
+            for row in case.category_type.all():
+                options = ""
+                for option in row.options.all():
+                    options = option + options
+
+                date_time = session.created_at.strftime("%Y-%m-%d_%H-%M")
+                row = [project_name, session.session_name, case.case_name, date_time, f"{row.category}__{row.type}", row.image_id, row.score, labels, options]
+
+                csv_data.append(row)
 
         csv_text = "\n".join([",".join(['"{}"'.format(value) for value in row]) for row in csv_data])
 
