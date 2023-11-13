@@ -48,6 +48,18 @@ class Reference_Folder(models.Model):
 
     def __str__(self) :
         return self.reference_name
+    
+    def clone(self):
+        new_folder = Reference_Folder(reference_name=self.reference_name)
+        new_folder.save()
+
+        # Clone and add associated images to the new folder
+        for image in self.image.all():
+            new_image = Image.objects.create(image  = image.image)
+            new_folder.image.add(new_image)
+
+        return new_folder
+    
 
 
 class Category_Type(models.Model):
@@ -78,6 +90,7 @@ class Case(models.Model):
 
 class Session(models.Model):
     case = models.ManyToManyField(Case)
+    session_name = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add = True)
 
     def __str__(self):

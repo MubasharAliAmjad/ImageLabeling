@@ -6,6 +6,7 @@ from .swagger_config import schema_view
 router = DefaultRouter()
 
 router.register(r'project', views.ProjectView, basename='project')
+router.register(r'session', views.SessionView, basename='session')
 router.register(r'unzip', views.UnZipView, basename='unzip')
 
 urlpatterns = [

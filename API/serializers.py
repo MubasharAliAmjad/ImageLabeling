@@ -160,14 +160,74 @@ class  Slice_Fields_Serializer(serializers.Serializer):
 
 class CustomSliceSerializer(serializers.Serializer):
     slices = Slice_Serializer(many = True, read_only = True)
-    slices_data = Slice_Fields_Serializer(many = True, write_only = True)
     
+    
+
+class CaseSerializer(serializers.ModelSerializer):
+    category_type = CategoryTypeSerializer(many = True, read_only=True)
+    reference_folder = ReferenceFolderSerializer()
+    labels = LabelsSerializer(many = True)
+    options = OptionsSerializer(many = True, write_only = True)
+    class Meta:
+        model = Case
+        fields = "__all__"
+        
+
+class SessionSerializer(serializers.ModelSerializer):
+    case = CaseSerializer(many = True, read_only = True)
+    slices_data = Slice_Fields_Serializer(many = True, write_only = True)
+    session_name = serializers.CharField(max_length = 200, write_only = True)
+    class Meta:
+        model = Session
+        fields = ['slices_data', 'case',"session_name"]
+
     
     def create(self, validated_data):
+        
         try:
             slices = validated_data.pop("slices_data")
             session_obj = SliceSession.objects.create()
+            
             project_obj = Project.objects.get(id = slices[0]["project_id"])
+            session_name = validated_data.pop("session_name")
+
+            case_obj = Case.objects.get(id = slices[0]["case_id"])
+            labels = case_obj.labels
+            labels = list(labels.all())
+            reference_obj = case_obj.reference_folder
+            new_reference_instance = reference_obj.clone()
+            new_case_obj = Case.objects.create(case_name = case_obj.case_name, notes = case_obj.notes, cols_number = case_obj.cols_number, rows_number = case_obj.rows_number, randomize_cases = case_obj.randomize_cases, randomize_categories = case_obj.randomize_categories, reference_folder = new_reference_instance)
+            new_case_obj.labels.set(labels)
+            category_type_list = []
+            case_list = []
+            for slice in slices:
+                option_list = []
+                for option_data in slice["options"]:
+                    option, _ = Options.objects.get_or_create(value=option_data)
+                    option_list.append(option)
+
+                category_type_obj = Category_Type.objects.get(id = slice["category_type"])
+                new_category_type = Category_Type.objects.create(category = category_type_obj.category, type = category_type_obj.type)
+                new_category_type.options.set(option_list)
+                image_obj = Image.objects.get(id = slice["image_id"])
+                new_image = Image.objects.create(image  = image_obj.image)
+                new_category_type.image.add(new_image)
+                category_type_list.append(new_category_type)
+            new_case_obj.category_type.set(category_type_list)
+            new_case_obj.save()
+            case_list.append(new_case_obj)
+            session = Session.objects.create(session_name = session_name)
+            session.case.add(*case_list)
+            project_obj.session.add(session)
+            return session
+
+                
+                
+                
+
+
+            
+            
             slice_list = []
             for slice in slices:
 
@@ -207,34 +267,17 @@ class CustomSliceSerializer(serializers.Serializer):
         return session_obj
     
 
-class CaseSerializer(serializers.ModelSerializer):
-    category_type = CategoryTypeSerializer(many = True, read_only=True)
-    reference_folder = ReferenceFolderSerializer()
-    labels = LabelsSerializer(many = True)
-    options = OptionsSerializer(many = True, write_only = True)
-    class Meta:
-        model = Case
-        fields = "__all__"
-        
-
-class Session_Serializer(serializers.ModelSerializer):
-    case = CaseSerializer(many = True)
-    class Meta:
-        model = Session
-        fields = "__all__"
-    
-
 
 class ProjectSerializer(serializers.ModelSerializer):
     zip_folder = serializers.CharField(max_length = 150, write_only = True)
     rows_list = serializers.ListField(max_length = 50, write_only = True)
     columns_list = serializers.ListField(max_length = 50, write_only = True)
-    session = Session_Serializer(many = True, read_only = True)
+    session = SessionSerializer(many = True, read_only = True)
     case = CaseSerializer(many = True, write_only = True)
     
     class Meta:
         model = Project
-        fields = "__all__"
+        fields = ["id", "project_name", "question", "session", "created_at", "zip_folder", "rows_list", "columns_list", "session", "case"]
 
 # overriding methods of serializer is useful when you want to apply logic on particular models
 
@@ -246,7 +289,6 @@ class ProjectSerializer(serializers.ModelSerializer):
                             if file_dir not in list_folders:
                                 if os.path.isdir(os.path.join(subfolders_path, case_name, file_dir)):
                                     list_folders.append(file_dir)
-                                    import pdb; pdb.set_trace
         return list_folders
 
     def find_images(self, list_cases_in_zip, subfolders_path, file_folder):

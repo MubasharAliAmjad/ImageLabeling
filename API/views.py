@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from .models import Project, ZipFile, SliceSession
-from .serializers import ProjectSerializer, UnzipSerializer, CustomSliceSerializer
+from .models import Project, ZipFile, SliceSession, Session
+from .serializers import ProjectSerializer, UnzipSerializer, CustomSliceSerializer, SessionSerializer
 from rest_framework import viewsets
 from django.http import HttpResponse
 from .request_permissions import CustomPermission
@@ -83,6 +83,11 @@ class ProjectView(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [CustomPermission]
 
+class SessionView(viewsets.ModelViewSet):
+    queryset = Session.objects.all()
+    serializer_class = SessionSerializer
+    permission_classes = [CustomPermission]
+
 class ExportDataview(APIView):
     def get(self,request, id):
         
@@ -114,7 +119,7 @@ class ExportDataview(APIView):
 
 class CustomSliceView(APIView):
     def post(self, request):
-        serializer = CustomSliceSerializer(data=request.data)
+        serializer = SessionSerializer(data=request.data)
 
         if serializer.is_valid():
             session_obj = serializer.save()
