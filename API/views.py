@@ -95,7 +95,7 @@ class ExportDataview(APIView):
         projects_related_to_session = session.project_set.all()
         
         project_name = projects_related_to_session[0].project_name
-        import pdb; pdb.set_trace()
+        
         date_time = session.created_at.strftime("%Y-%m-%d_%H-%M")
         
         title = f"{project_name}-{date_time}.csv"
@@ -106,17 +106,19 @@ class ExportDataview(APIView):
         row = []
 
         for case in session.case.all():
-            labels = ""
+            label_string = ""
+            import pdb; pdb.set_trace()
             for label in case.labels.all():
-                labels = label + "," + labels
+                label_string = label.value + "," + label_string
+            
 
             for row in case.category_type.all():
                 options = ""
                 for option in row.options.all():
-                    options = option + options
+                    options = option.value + options
 
                 date_time = session.created_at.strftime("%Y-%m-%d_%H-%M")
-                row = [project_name, session.session_name, case.case_name, date_time, f"{row.category}__{row.type}", row.image_id, row.score, labels, options]
+                row = [project_name, session.session_name, case.case_name, date_time, f"{row.category}__{row.type}", row.image_id, row.score, label_string, options]
 
                 csv_data.append(row)
 

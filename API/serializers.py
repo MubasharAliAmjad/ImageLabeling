@@ -176,10 +176,10 @@ class CaseSerializer(serializers.ModelSerializer):
 class SessionSerializer(serializers.ModelSerializer):
     case = CaseSerializer(many = True, read_only = True)
     slices_data = Slice_Fields_Serializer(many = True, write_only = True)
-    session_name = serializers.CharField(max_length = 200, write_only = True)
+    # session_name = serializers.CharField(max_length = 200, write_only = True)
     class Meta:
         model = Session
-        fields = ['id', 'slices_data', 'case',"session_name"]
+        fields = ['id', 'slices_data', 'case', "session_name"]
 
     
     def create(self, validated_data):
