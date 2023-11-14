@@ -260,7 +260,7 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
     slices_data = Slice_Fields_Serializer(many = True, write_only = True)
     class Meta:
         model = Session
-        fields = ["id", "case", "slices_data"]
+        fields = ["id", "session_name", "case", "slices_data"]
 
     def update(self, instance, validated_data):
         
