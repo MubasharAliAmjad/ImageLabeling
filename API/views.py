@@ -80,6 +80,7 @@ class ReadFromLocalView(APIView):
 
 
 class ProjectView(viewsets.ModelViewSet):
+    # import pdb; pdb.set_trace()
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [CustomPermission]

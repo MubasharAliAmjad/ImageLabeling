@@ -254,7 +254,6 @@ class SessionCreateSerializer(serializers.ModelSerializer):
         except Exception as e:
             return serializers.ValidationError(f"An exception occurred: {e}")
         
-        return session_obj
     
 class SessionUpdateSerializer(serializers.ModelSerializer):
     case = CaseSerializer(many = True, read_only = True)
@@ -295,6 +294,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     zip_folder = serializers.CharField(max_length = 150, write_only = True)
     rows_list = serializers.ListField(max_length = 50, write_only = True)
     columns_list = serializers.ListField(max_length = 50, write_only = True)
+
     session = SessionUpdateSerializer(many = True, read_only = True)
     case = CaseSerializer(many = True, write_only = True)
     
@@ -337,8 +337,10 @@ class ProjectSerializer(serializers.ModelSerializer):
             dicom_file.close()
         return category_type
 
+    
 
     def create(self, validated_data):
+        
         try:
             project_name = validated_data.get("project_name")
             zip_folder = validated_data.pop('zip_folder')
@@ -380,11 +382,12 @@ class ProjectSerializer(serializers.ModelSerializer):
             option_list = []
 
             for label_data in labels_data:
-                    label, _ = Labels.objects.get_or_create(value=label_data['value'])
+                    import pdb; pdb.set_trace()
+                    label = Labels.objects.create(value=label_data['value'])
                     label_list.append(label)
 
             for option_data in options_data:
-                option, _ = Options.objects.get_or_create(value=option_data['value'])
+                option = Options.objects.create(value=option_data['value'])
                 option_list.append(option)
 
             for case in list_cases_in_zip:
