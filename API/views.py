@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.response import Response
 from .models import Project, ZipFile, SliceSession, Session
-from .serializers import ProjectSerializer, UnzipSerializer, CustomSliceSerializer, SessionSerializer
+from .serializers import ProjectSerializer, UnzipSerializer, CustomSliceSerializer, SessionCreateSerializer,SessionUpdateSerializer
 from rest_framework import viewsets
 from django.http import HttpResponse
 from .request_permissions import CustomPermission
@@ -10,6 +10,7 @@ import os, zipfile
 import uuid
 from django.conf import settings
 from django.core.files.storage import default_storage
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
 import csv
 
 # Create your views here.
@@ -83,10 +84,15 @@ class ProjectView(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [CustomPermission]
 
-class SessionView(viewsets.ModelViewSet):
+class SessionCreateView(CreateAPIView):
+    serializer_class = SessionCreateSerializer
     queryset = Session.objects.all()
-    serializer_class = SessionSerializer
     permission_classes = [CustomPermission]
+
+class SessionUpdateView(RetrieveUpdateAPIView):
+    serializer_class = SessionUpdateSerializer
+    queryset = Session.objects.all()
+    # permission_classes = [CustomPermission]
 
 class ExportDataview(APIView):
     def get(self,request, id):
@@ -118,7 +124,7 @@ class ExportDataview(APIView):
                     options = option.value + options
 
                 date_time = session.created_at.strftime("%Y-%m-%d_%H-%M")
-                
+
                 row = [project_name, session.session_name, case.case_name, date_time, f"{row.category}__{row.type}", row.image_id, row.score, label_string, options]
 
                 csv_data.append(row)
@@ -132,7 +138,7 @@ class ExportDataview(APIView):
 
 class CustomSliceView(APIView):
     def post(self, request):
-        serializer = SessionSerializer(data=request.data)
+        serializer = SessionCreateSerializer(data=request.data)
 
         if serializer.is_valid():
             session_obj = serializer.save()

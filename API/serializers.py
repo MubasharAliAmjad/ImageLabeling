@@ -149,11 +149,11 @@ class Slice_Serializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class  Slice_Fields_Serializer(serializers.Serializer):
-    project_id = serializers.IntegerField(write_only = True)
+    # project_id = serializers.IntegerField(write_only = True)
     case_id = serializers.IntegerField(write_only = True)
     category_type = serializers.IntegerField(write_only = True)
     image_id = serializers.IntegerField(write_only = True)
-    labels = serializers.ListField(write_only = True)
+    # labels = serializers.ListField(write_only = True)
     options = serializers.ListField(write_only = True)
     score = serializers.IntegerField(write_only = True)
         
@@ -173,7 +173,7 @@ class CaseSerializer(serializers.ModelSerializer):
         fields = "__all__"
         
 
-class SessionSerializer(serializers.ModelSerializer):
+class SessionCreateSerializer(serializers.ModelSerializer):
     case = CaseSerializer(many = True, read_only = True)
     id = serializers.IntegerField()
     # slices_data = Slice_Fields_Serializer(many = True, write_only = True)
@@ -244,12 +244,6 @@ class SessionSerializer(serializers.ModelSerializer):
             projects_related_to_session[0].session.set(session_list)
 
             return new_session
-
-                
-                    
-                    
-
-
                 
                 
                 
@@ -295,13 +289,47 @@ class SessionSerializer(serializers.ModelSerializer):
         
         return session_obj
     
+class SessionUpdateSerializer(serializers.ModelSerializer):
+    case = CaseSerializer(many = True, read_only = True)
+    slices_data = Slice_Fields_Serializer(many = True, write_only = True)
+    class Meta:
+        model = Session
+        fields = ["case", "slices_data"]
 
+    def update(self, instance, validated_data):
+        
+        slice_data = validated_data.pop("slices_data")
+        for slice in slice_data:
+            case_id = slice["case_id"]
+            instance_cases = instance.case.all()
+            for instance_case in instance_cases:
+                
+                if instance_case.id == case_id:
+                    instance_categories_types = instance_case.category_type.all()
+                    for instance_category_type in instance_categories_types:
+                        category_type_id = slice["category_type"]
+                        if instance_category_type.id == category_type_id:
+
+                            validated_image_id = slice["image_id"]
+                            
+                            validated_image_obj = Image.objects.get(id = validated_image_id)
+                            list_image = []
+                            list_image.append(validated_image_obj)
+                            instance_category_type.image.set(list_image)
+                            instance_category_type.score = slice["score"]
+                            instance_category_type.save()
+                            for option_id in slice["options"]:
+                                instance_option = instance_category_type.options.get(id = int(option_id))
+                                instance_option.checked = True
+                                instance_option.save()
+            
+        return instance
 
 class ProjectSerializer(serializers.ModelSerializer):
     zip_folder = serializers.CharField(max_length = 150, write_only = True)
     rows_list = serializers.ListField(max_length = 50, write_only = True)
     columns_list = serializers.ListField(max_length = 50, write_only = True)
-    session = SessionSerializer(many = True, read_only = True)
+    session = SessionCreateSerializer(many = True, read_only = True)
     case = CaseSerializer(many = True, write_only = True)
     
     class Meta:
@@ -346,6 +374,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         try:
+            project_name = validated_data.get("project_name")
             zip_folder = validated_data.pop('zip_folder')
             rows_list = validated_data.pop('rows_list')
             columns_list = validated_data.pop('columns_list') 
@@ -434,7 +463,7 @@ class ProjectSerializer(serializers.ModelSerializer):
                         case_obj.save()
                         case_list.append(case_obj)
         
-            session = Session.objects.create()
+            session = Session.objects.create(session_name = project_name)
             session.case.add(*case_list)
             session_list.append(session)
             project = Project.objects.create(**validated_data)
