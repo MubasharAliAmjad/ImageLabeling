@@ -16,6 +16,6 @@ urlpatterns = [
     path('create_session/', views.SessionCreateView.as_view()),
     path('update_session/<int:pk>/', views.SessionUpdateView.as_view()),
     path('read_local/', views.ReadFromLocalView.as_view()),
-    path('slice/', views.CustomSliceView.as_view()),
-    path('export_data/<int:id>/', views.ExportDataview.as_view()),
+    # path('slice/', views.CustomSliceView.as_view()),
+    # path('export_data/<int:id>/', views.ExportDataview.as_view()),
 ]

@@ -175,18 +175,18 @@ class CaseSerializer(serializers.ModelSerializer):
 
 class SessionCreateSerializer(serializers.ModelSerializer):
     case = CaseSerializer(many = True, read_only = True)
-    id = serializers.IntegerField()
+    session_id = serializers.IntegerField(write_only = True)
     # slices_data = Slice_Fields_Serializer(many = True, write_only = True)
     # session_name = serializers.CharField(max_length = 200, write_only = True)
     class Meta:
         model = Session
-        fields = ["id", "session_name", "created_at", "case"]
+        fields = ["id", "session_id", "session_name", "created_at", "case"]
 
     
     def create(self, validated_data):
-        
         try:
-            session_id = validated_data.pop('id')
+            
+            session_id = validated_data.pop('session_id')
             session_name = validated_data.pop('session_name')
 
             existing_session = Session.objects.get(id = session_id)
@@ -311,11 +311,10 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                         if instance_category_type.id == category_type_id:
 
                             validated_image_id = slice["image_id"]
+                            image_instance = instance_category_type.image.get(id = validated_image_id)
+                            image_instance.checked = True
+                            image_instance.save()
                             
-                            validated_image_obj = Image.objects.get(id = validated_image_id)
-                            list_image = []
-                            list_image.append(validated_image_obj)
-                            instance_category_type.image.set(list_image)
                             instance_category_type.score = slice["score"]
                             instance_category_type.save()
                             for option_id in slice["options"]:

@@ -37,6 +37,7 @@ class SliceSession(models.Model):
 
 class Image(models.Model):
     image = models.ImageField(upload_to='API/dicom_images/')
+    checked = models.BooleanField(default=False)
 
     def __str__(self):
         # f'media/{instance.image.url}'
