@@ -94,48 +94,48 @@ class SessionUpdateView(RetrieveUpdateAPIView):
     queryset = Session.objects.all()
     # permission_classes = [CustomPermission]
 
-    def get(self, request, *args, **kwargs):
-        # Your custom GET logic here
+    # def get(self, request, *args, **kwargs):
+    #     # Your custom GET logic here
         
-        instance_session = self.get_object()
-        projects_related_to_session = instance_session.project_set.all()
-        project_name = projects_related_to_session[0].project_name
+    #     instance_session = self.get_object()
+    #     projects_related_to_session = instance_session.project_set.all()
+    #     project_name = projects_related_to_session[0].project_name
         
-        date_time = instance_session.created_at.strftime("%Y-%m-%d_%H-%M")
+    #     date_time = instance_session.created_at.strftime("%Y-%m-%d_%H-%M")
         
-        title = f"{project_name}-{date_time}.csv"
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = f'attachment; filename="{title}"'
-        csv_data = []
-        csv_data.append(['Project Name', 'Session Name', 'Case Name', 'TimeStamp', 'Category_Type', 'Slice Id', 'Score', 'Labels', 'Options'])
-        row = []
+    #     title = f"{project_name}-{date_time}.csv"
+    #     response = HttpResponse(content_type='text/csv')
+    #     response['Content-Disposition'] = f'attachment; filename="{title}"'
+    #     csv_data = []
+    #     csv_data.append(['Project Name', 'Session Name', 'Case Name', 'TimeStamp', 'Category_Type', 'Slice Id', 'Score', 'Labels', 'Options'])
+    #     row = []
 
-        for case in instance_session.case.all():
-            label_string = ""
-            for label in case.labels.all():
-                label_string = label.value + "," + label_string
+    #     for case in instance_session.case.all():
+    #         label_string = ""
+    #         for label in case.labels.all():
+    #             label_string = label.value + "," + label_string
             
 
-            for row in case.category_type.all():
-                options = ""
-                for option in row.options.all():
-                    options = option.value + options
+    #         for row in case.category_type.all():
+    #             options = ""
+    #             for option in row.options.all():
+    #                 options = option.value + options
 
-                date_time = instance_session.created_at.strftime("%Y-%m-%d_%H-%M")
-                image_id = ""
-                for image in row.image.all():
-                    if image.checked == True:
-                        image_id = str(image.id) + "," + image_id
+    #             date_time = instance_session.created_at.strftime("%Y-%m-%d_%H-%M")
+    #             image_id = ""
+    #             for image in row.image.all():
+    #                 if image.checked == True:
+    #                     image_id = str(image.id) + "," + image_id
 
-                        row = [project_name, instance_session.session_name, case.case_name, date_time, f"{row.category}__{row.type}", image_id, row.score, label_string, options]
+    #                     row = [project_name, instance_session.session_name, case.case_name, date_time, f"{row.category}__{row.type}", image_id, row.score, label_string, options]
 
-                        csv_data.append(row)
+    #                     csv_data.append(row)
 
-        csv_text = "\n".join([",".join(['"{}"'.format(value) for value in row]) for row in csv_data])
+    #     csv_text = "\n".join([",".join(['"{}"'.format(value) for value in row]) for row in csv_data])
 
-        # Return the CSV data as text content
-        response_data = {'csv_text': csv_text}
-        return Response(response_data)
+    #     # Return the CSV data as text content
+    #     response_data = {'csv_text': csv_text}
+    #     return Response(response_data)
 
 
 
@@ -167,14 +167,19 @@ class ExportDataview(APIView):
                 label_string = label.value + "," + label_string
             
 
-            for row in case.category_type.all():
+            for category_type in case.category_type.all():
                 options = ""
-                for option in row.options.all():
+                for option in category_type.options.all():
                     options = option.value + options
 
                 date_time = session.created_at.strftime("%Y-%m-%d_%H-%M")
+                image_id = ""
 
-                row = [project_name, session.session_name, case.case_name, date_time, f"{row.category}__{row.type}", row.image_id, row.score, label_string, options]
+                for image in category_type.image.all():
+                    if image.checked == True:
+                        image_id = str(image.id) + "," + image_id
+                        row = [project_name, session.session_name, case.case_name, date_time, f"{category_type.category}_{category_type.type}", image_id, category_type.score, label_string, options]
+                        csv_data.append(row)
 
                 csv_data.append(row)
 

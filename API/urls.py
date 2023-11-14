@@ -13,9 +13,9 @@ urlpatterns = [
     path('swagger<str:format>', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),    
     path('', include(router.urls)),
-    path('create_session/', views.SessionCreateView.as_view()),
-    path('update_session/<int:pk>/', views.SessionUpdateView.as_view()),
-    path('read_local/', views.ReadFromLocalView.as_view()),
+    path('create_session/', views.SessionCreateView.as_view(), name="create_session"),
+    path('update_session/<int:pk>/', views.SessionUpdateView.as_view(), name="update_session"),
+    path('read_local/', views.ReadFromLocalView.as_view(), name="read_local"),
     # path('slice/', views.CustomSliceView.as_view()),
-    # path('export_data/<int:id>/', views.ExportDataview.as_view()),
+    path('export_data/<int:id>/', views.ExportDataview.as_view()),
 ]
