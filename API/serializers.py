@@ -262,6 +262,10 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
         model = Session
         fields = ["id", "session_name", "case", "slices_data"]
 
+    def to_representation(self, instance):
+        # Assuming instance is your data
+        return {"session": [super().to_representation(instance)]}
+
     def update(self, instance, validated_data):
         
         slice_data = validated_data.pop("slices_data")
