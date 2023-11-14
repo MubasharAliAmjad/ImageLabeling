@@ -180,12 +180,11 @@ class SessionCreateSerializer(serializers.ModelSerializer):
     # session_name = serializers.CharField(max_length = 200, write_only = True)
     class Meta:
         model = Session
-        fields = ["id", "session_id", "session_name", "created_at", "case"]
+        fields = ["session_id", "session_name", "created_at", "case"]
 
     
     def create(self, validated_data):
         try:
-            
             session_id = validated_data.pop('session_id')
             session_name = validated_data.pop('session_name')
 
@@ -244,39 +243,7 @@ class SessionCreateSerializer(serializers.ModelSerializer):
             projects_related_to_session[0].session.set(session_list)
 
             return new_session
-                
-                
-                
 
-
-            
-            
-            slice_list = []
-            for slice in slices:
-
-                options = ""
-                for option in slice["options"]:
-                    options = option + "," + options
-                    
-                labels = ""
-                for label in slice["labels"]:
-                    labels = label + "," + labels
-                
-                project_obj = Project.objects.get(id = slice["project_id"])
-                case_obj = Case.objects.get(id = slice["case_id"])
-                category_type_obj = Category_Type.objects.get(id = slice["category_type"])
-                category_type_name = f"{category_type_obj.category}_{category_type_obj.type}"
-
-                slice_obj = Slice.objects.create(project_name = project_obj.project_name, case_name = case_obj.case_name, category_type_name = category_type_name, image_id = slice["image_id"], labels = labels, options = options, score = slice["score"])
-                slice_list.append(slice_obj)
-            
-            session_list = project_obj.sliceSession.all()
-            session_list = list(session_list)
-            session_obj.slice.set(slice_list)
-            session_obj.save()
-            session_list.append(session_obj)
-            
-            project_obj.sliceSession.set(session_list)
         
         except KeyError as e:
             return serializers.ValidationError(f"Field '{e.args[0]}' is missing")
@@ -294,7 +261,7 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
     slices_data = Slice_Fields_Serializer(many = True, write_only = True)
     class Meta:
         model = Session
-        fields = ["case", "slices_data"]
+        fields = ["id", "case", "slices_data"]
 
     def update(self, instance, validated_data):
         
@@ -328,7 +295,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     zip_folder = serializers.CharField(max_length = 150, write_only = True)
     rows_list = serializers.ListField(max_length = 50, write_only = True)
     columns_list = serializers.ListField(max_length = 50, write_only = True)
-    session = SessionCreateSerializer(many = True, read_only = True)
+    session = SessionUpdateSerializer(many = True, read_only = True)
     case = CaseSerializer(many = True, write_only = True)
     
     class Meta:

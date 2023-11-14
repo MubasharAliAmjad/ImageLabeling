@@ -163,7 +163,6 @@ class ExportDataview(APIView):
 
         for case in session.case.all():
             label_string = ""
-            import pdb; pdb.set_trace()
             for label in case.labels.all():
                 label_string = label.value + "," + label_string
             
