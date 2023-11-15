@@ -106,7 +106,7 @@ class ExportDataview(APIView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{title}"'
         csv_data = []
-        csv_data.append(['Project Name', 'Session Name', 'Case Name', 'TimeStamp', 'Category_Type', 'Slice Id', 'Score', 'Labels', 'Options'])
+        csv_data.append(['Project Name', 'Session Name', 'Case Name', 'TimeStamp', 'Category_Type', 'Image Id', 'Score', 'Labels', 'Options'])
         row = []
 
 
@@ -122,14 +122,13 @@ class ExportDataview(APIView):
                     options = option.value + options
 
                 date_time = session.created_at.strftime("%Y-%m-%d_%H-%M")
+                
                 image_id = ""
-
                 for image in category_type.image.all():
-                    if image.checked == True:
-                        image_id = str(image.id) + "," + image_id
-                        row = [project_name, session.session_name, case.case_name, date_time, f"{category_type.category}_{category_type.type}", image_id, category_type.score, label_string, options]
-                        csv_data.append(row)
+                    image_id = str(image.id) + "," + image_id
 
+                row = [project_name, session.session_name, case.case_name, date_time, f"{category_type.category}_{category_type.type}", image_id, category_type.score, label_string, options]
+                csv_data.append(row)
 
         csv_text = "\n".join([",".join(['"{}"'.format(value) for value in row]) for row in csv_data])
 
