@@ -284,11 +284,14 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                                     image_instance.save()
                                 instance_category_type.score = slice["score"]
                                 instance_category_type.save()
-                                for option_id in slice["option"]:
-                                    
-                                    instance_option = instance_category_type.options.get(id = option_id)
-                                    instance_option.checked = True
-                                    instance_option.save()
+                                for option in instance_category_type.options.all():
+                                    if option.id in slice["option"]:
+                                        option.checked = True
+                                        option.save()
+                                    else:
+                                        option.checked = False
+                                        option.save()
+
         except KeyError as e:
             field_name = e.args[0] if e.args else 'unknown'
             return serializers.ValidationError(f"Field '{field_name}' is missing")
