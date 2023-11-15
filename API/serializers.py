@@ -149,8 +149,8 @@ class  Slice_Fields_Serializer(serializers.Serializer):
     # project_id = serializers.IntegerField(write_only = True)
     case_id = serializers.IntegerField(write_only = True)
     category_type = serializers.IntegerField(write_only = True)
-    image_id = serializers.IntegerField(write_only = True)
-    # labels = serializers.ListField(write_only = True)
+    image_id = serializers.ListField(write_only = True)
+    labels = serializers.ListField(write_only = True)
     options = serializers.ListField(write_only = True)
     score = serializers.IntegerField(write_only = True)
         
@@ -276,11 +276,11 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                         for instance_category_type in instance_categories_types:
                             category_type_id = slice["category_type"]
                             if instance_category_type.id == category_type_id:
-
-                                validated_image_id = slice["image_id"]
-                                image_instance = instance_category_type.image.get(id = validated_image_id)
-                                image_instance.checked = True
-                                image_instance.save()
+                                for image_id in slice["image_id"]:
+                                    validated_image_id = int(image_id)
+                                    image_instance = instance_category_type.image.get(id = validated_image_id)
+                                    image_instance.checked = True
+                                    image_instance.save()
                                 
                                 instance_category_type.score = slice["score"]
                                 instance_category_type.save()
