@@ -344,8 +344,13 @@ class ProjectSerializer(serializers.ModelSerializer):
                     return {"list_images": list_images, 
                             "image_folder_path": image_folder_path}
                 
-    def create_category_type(self, list_cases_in_zip, subfolders_path, file_folder, row_data, column_data, option_list):
+    def create_category_type(self, list_cases_in_zip, subfolders_path, file_folder, row_data, column_data, options_data):
         images_and_path = self.find_images(list_cases_in_zip, subfolders_path, file_folder)
+        option_list = []
+        for option_data in options_data:
+            option = Options.objects.create(value=option_data['value'])
+            option_list.append(option)
+
         category_type = Category_Type.objects.create(category = row_data, type = column_data)
         category_type.options.set(option_list)
 
@@ -400,15 +405,11 @@ class ProjectSerializer(serializers.ModelSerializer):
             session_list = []
             case_list = []
             label_list = []
-            option_list = []
 
             for label_data in labels_data:
                     label = Labels.objects.create(value=label_data['value'])
                     label_list.append(label)
 
-            for option_data in options_data:
-                option = Options.objects.create(value=option_data['value'])
-                option_list.append(option)
 
             for case in list_cases_in_zip:
                 if not os.path.isdir(os.path.join(subfolders_path, case)):
@@ -435,16 +436,22 @@ class ProjectSerializer(serializers.ModelSerializer):
                     
                         if f"{row_data}_{column_data}" in list_folders_in_zip:
                             file_folder = f"{row_data}_{column_data}"
-                            category_type = self.create_category_type(list_cases_in_zip, subfolders_path, file_folder, row_data, column_data, option_list)
+                            category_type = self.create_category_type(list_cases_in_zip, subfolders_path, file_folder, row_data, column_data, options_data)
                             category_type_list.append(category_type)
 
                         elif f"{column_data}_{row_data}" in list_folders_in_zip:
                             file_folder = f"{column_data}_{row_data}"
-                            category_type = self.create_category_type(list_cases_in_zip, subfolders_path, file_folder, column_data, row_data, option_list)
+                            category_type = self.create_category_type(list_cases_in_zip, subfolders_path, file_folder, column_data, row_data, options_data)
                             category_type_list.append(category_type)
 
                         else:
                             category_type = Category_Type.objects.create(category = column_data, type = row_data)
+                            
+                            option_list = []
+                            for option_data in options_data:
+                                option = Options.objects.create(value=option_data['value'])
+                                option_list.append(option)
+
                             category_type.options.set(option_list)
                             category_type_list.append(category_type)
 
