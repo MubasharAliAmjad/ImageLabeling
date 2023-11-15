@@ -219,10 +219,12 @@ class SessionCreateSerializer(serializers.ModelSerializer):
                     label_list.append(label_obj)
 
                 reference_obj = Reference_Folder.objects.create(reference_name = case.reference_folder.reference_name)
-                for image in reference_obj.image.all():
-                    image_obj = Image(image = image)
+                for image in case.reference_folder.image.all():
+
+                    image_obj = Image(image = image.image)
                     image_obj.save()
                     reference_obj.image.add(image)
+                    reference_obj.save()
                 
                 case_obj = Case.objects.create(case_name = case.case_name, notes = case.notes, cols_number = case.cols_number, rows_number = case.rows_number, reference_folder = reference_obj)
                 case_obj.labels.set(label_list)
