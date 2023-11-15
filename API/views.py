@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.response import Response
 from .models import Project, ZipFile, SliceSession, Session
-from .serializers import ProjectSerializer, UnzipSerializer, CustomSliceSerializer, SessionCreateSerializer,SessionUpdateSerializer
+from .serializers import ProjectSerializer, UnzipSerializer, SessionCreateSerializer,SessionUpdateSerializer
 from rest_framework import viewsets
 from django.http import HttpResponse
 from .request_permissions import CustomPermission
@@ -130,7 +130,6 @@ class ExportDataview(APIView):
                         row = [project_name, session.session_name, case.case_name, date_time, f"{category_type.category}_{category_type.type}", image_id, category_type.score, label_string, options]
                         csv_data.append(row)
 
-                csv_data.append(row)
 
         csv_text = "\n".join([",".join(['"{}"'.format(value) for value in row]) for row in csv_data])
 

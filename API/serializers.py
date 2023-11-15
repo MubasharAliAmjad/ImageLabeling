@@ -133,17 +133,17 @@ class ReferenceFolderSerializer(serializers.ModelSerializer):
         return image_list
 
 
-class CategoryTypeItemSerializer(serializers.Serializer):
-    obj_id = serializers.IntegerField()
-    slice = serializers.IntegerField()
-    zoom_level = serializers.IntegerField()
-    options = OptionsSerializer(many = True, write_only = True)
-    labels = LabelsSerializer(many = True)
+# class CategoryTypeItemSerializer(serializers.Serializer):
+#     obj_id = serializers.IntegerField()
+#     slice = serializers.IntegerField()
+#     zoom_level = serializers.IntegerField()
+#     options = OptionsSerializer(many = True, write_only = True)
+#     labels = LabelsSerializer(many = True)
 
-class Slice_Serializer(serializers.ModelSerializer):
-    class Meta:
-        model = Slice
-        fields = "__all__"
+# class Slice_Serializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Slice
+#         fields = "__all__"
 
 class  Slice_Fields_Serializer(serializers.Serializer):
     # project_id = serializers.IntegerField(write_only = True)
@@ -156,8 +156,8 @@ class  Slice_Fields_Serializer(serializers.Serializer):
     score = serializers.IntegerField(write_only = True)
         
 
-class CustomSliceSerializer(serializers.Serializer):
-    slices = Slice_Serializer(many = True, read_only = True)
+# class CustomSliceSerializer(serializers.Serializer):
+#     slices = Slice_Serializer(many = True, read_only = True)
     
     
 
@@ -404,14 +404,13 @@ class ProjectSerializer(serializers.ModelSerializer):
 
             session_list = []
             case_list = []
-            label_list = []
-
-            for label_data in labels_data:
-                    label = Labels.objects.create(value=label_data['value'])
-                    label_list.append(label)
 
 
             for case in list_cases_in_zip:
+                label_list = []
+                for label_data in labels_data:
+                    label = Labels.objects.create(value=label_data['value'])
+                    label_list.append(label)
                 if not os.path.isdir(os.path.join(subfolders_path, case)):
                     continue
 
@@ -446,7 +445,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
                         else:
                             category_type = Category_Type.objects.create(category = column_data, type = row_data)
-                            
+
                             option_list = []
                             for option_data in options_data:
                                 option = Options.objects.create(value=option_data['value'])
