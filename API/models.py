@@ -32,6 +32,8 @@ class Slice(models.Model):
     score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add = True)
 
+
+
 class SliceSession(models.Model):
     slice = models.ManyToManyField(Slice)
 

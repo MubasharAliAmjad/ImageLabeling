@@ -131,9 +131,6 @@ class ReferenceFolderSerializer(serializers.ModelSerializer):
         for image in image_list:
             image['image'] = f"media/{image['image']}"
         return image_list
-    
-
-
 
 
 class CategoryTypeItemSerializer(serializers.Serializer):
@@ -267,39 +264,55 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
         return {"session": [super().to_representation(instance)]}
 
     def update(self, instance, validated_data):
-        
-        slice_data = validated_data.pop("slices_data")
-        for slice in slice_data:
-            case_id = slice["case_id"]
-            instance_cases = instance.case.all()
-            for instance_case in instance_cases:
-                
-                if instance_case.id == case_id:
-                    instance_categories_types = instance_case.category_type.all()
-                    for instance_category_type in instance_categories_types:
-                        category_type_id = slice["category_type"]
-                        if instance_category_type.id == category_type_id:
+        try:
+            slice_data = validated_data.pop("slices_data")
+            for slice in slice_data:
+                case_id = slice["case_id"]
+                instance_cases = instance.case.all()
+                for instance_case in instance_cases:
+                    
+                    if instance_case.id == case_id:
+                        instance_categories_types = instance_case.category_type.all()
+                        for instance_category_type in instance_categories_types:
+                            category_type_id = slice["category_type"]
+                            if instance_category_type.id == category_type_id:
 
-                            validated_image_id = slice["image_id"]
-                            image_instance = instance_category_type.image.get(id = validated_image_id)
-                            image_instance.checked = True
-                            image_instance.save()
-                            
-                            instance_category_type.score = slice["score"]
-                            instance_category_type.save()
-                            for option_id in slice["options"]:
-                                instance_option = instance_category_type.options.get(id = int(option_id))
-                                instance_option.checked = True
-                                instance_option.save()
+                                validated_image_id = slice["image_id"]
+                                image_instance = instance_category_type.image.get(id = validated_image_id)
+                                image_instance.checked = True
+                                image_instance.save()
+                                
+                                instance_category_type.score = slice["score"]
+                                instance_category_type.save()
+                                for option_id in slice["options"]:
+                                    instance_option = instance_category_type.options.get(id = int(option_id))
+                                    instance_option.checked = True
+                                    instance_option.save()
+        except KeyError as e:
+            field_name = e.args[0] if e.args else 'unknown'
+            return serializers.ValidationError(f"Field '{field_name}' is missing")
+        except IndexError as e:
+            return serializers.ValidationError("Index out of range")
+        except AttributeError as e:
+            return serializers.ValidationError(f"AttributeError, raised during assigning of object: {e}")
+        except Exception as e:
+            return serializers.ValidationError(f"An exception occurred: {e}")
             
         return instance
+    
+class SessionSerializer(serializers.ModelSerializer):
+    case = CaseSerializer(many = True, read_only = True)
+    slices_data = Slice_Fields_Serializer(many = True, write_only = True)
+    class Meta:
+        model = Session
+        fields = ["id", "session_name", "case", "slices_data"]
 
 class ProjectSerializer(serializers.ModelSerializer):
     zip_folder = serializers.CharField(max_length = 150, write_only = True)
     rows_list = serializers.ListField(max_length = 50, write_only = True)
     columns_list = serializers.ListField(max_length = 50, write_only = True)
 
-    session = SessionUpdateSerializer(many = True, read_only = True)
+    session = SessionSerializer(many = True, read_only = True)
     case = CaseSerializer(many = True, write_only = True)
     
     class Meta:
@@ -442,7 +455,8 @@ class ProjectSerializer(serializers.ModelSerializer):
             project.session.set(session_list)
 
         except KeyError as e:
-            return serializers.ValidationError(f"Field '{e.args[0]}' is missing")
+            field_name = e.args[0] if e.args else 'unknown'
+            return serializers.ValidationError(f"Field '{field_name}' is missing")
         except IndexError as e:
             return serializers.ValidationError("Index out of range")
         except AttributeError as e:
