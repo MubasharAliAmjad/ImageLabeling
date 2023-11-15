@@ -149,8 +149,9 @@ class  Slice_Fields_Serializer(serializers.Serializer):
     # project_id = serializers.IntegerField(write_only = True)
     case_id = serializers.IntegerField(write_only = True)
     category_type = serializers.IntegerField(write_only = True)
-    image_id = serializers.ListField(write_only = True)
+    image_id = serializers.ListField(write_only = True,  child=serializers.IntegerField())
     labels = serializers.ListField(write_only = True)
+    option = serializers.ListField(write_only = True,  child=serializers.IntegerField())
     options = serializers.ListField(write_only = True)
     score = serializers.IntegerField(write_only = True)
         
@@ -281,11 +282,11 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                                     image_instance = instance_category_type.image.get(id = validated_image_id)
                                     image_instance.checked = True
                                     image_instance.save()
-                                
                                 instance_category_type.score = slice["score"]
                                 instance_category_type.save()
-                                for option_id in slice["options"]:
-                                    instance_option = instance_category_type.options.get(id = int(option_id))
+                                for option_id in slice["option"]:
+                                    
+                                    instance_option = instance_category_type.options.get(id = option_id)
                                     instance_option.checked = True
                                     instance_option.save()
         except KeyError as e:
