@@ -7,7 +7,7 @@ from django.core.files import File
 from django.core.files.storage import FileSystemStorage
 from django.core.files.storage import default_storage
 import random
-
+from django.utils import timezone
 
 class UnzipSerializer(serializers.Serializer):
     uploaded_file = serializers.FileField()
@@ -293,6 +293,8 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                                     else:
                                         option.checked = False
                                         option.save()
+                                instance.created_at = timezone.now()
+                                instance.save()
 
         except KeyError as e:
             field_name = e.args[0] if e.args else 'unknown'

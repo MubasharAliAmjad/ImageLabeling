@@ -100,7 +100,7 @@ class ExportDataview(APIView):
         
         project_name = projects_related_to_session[0].project_name
         
-        date_time = session.created_at.strftime("%Y-%m-%d_%H-%M")
+        date_time = session.created_at.strftime("%d:%m:%Y %I:%M %p")
         
         title = f"{project_name}-{date_time}.csv"
         response = HttpResponse(content_type='text/csv')
@@ -119,9 +119,8 @@ class ExportDataview(APIView):
             for category_type in case.category_type.all():
                 options = ""
                 for option in category_type.options.all():
-                    options = option.value + options
-
-                date_time = session.created_at.strftime("%Y-%m-%d_%H-%M")
+                    if option.checked == True:
+                        options = option.value + options
                 
                 image_id = ""
                 for image in category_type.image.all():
