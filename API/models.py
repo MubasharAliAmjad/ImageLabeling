@@ -6,8 +6,9 @@ from django.utils import timezone
 # Create your models here.
 
 class Labels(models.Model):
-    value = models.CharField(max_length=100)
+    value = models.CharField(max_length=100, null=True)
     checked = models.BooleanField(default=False)
+    score = models.CharField(max_length=20)
 
     def __str__(self):
         return self.value
@@ -29,7 +30,6 @@ class Slice(models.Model):
     image_id = models.PositiveIntegerField(default=0)
     labels = models.CharField(max_length=500)
     options = models.CharField(max_length=500)
-    score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add = True)
 
 
@@ -66,7 +66,6 @@ class Category_Type(models.Model):
     type = models.CharField(max_length=100)
     image = models.ManyToManyField(Image, blank=True)
     options = models.ManyToManyField(Options)
-    score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add = True)
 
     def __str__(self):

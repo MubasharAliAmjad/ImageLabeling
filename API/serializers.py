@@ -145,15 +145,14 @@ class ReferenceFolderSerializer(serializers.ModelSerializer):
 #         model = Slice
 #         fields = "__all__"
 
+
 class  Slice_Fields_Serializer(serializers.Serializer):
     # project_id = serializers.IntegerField(write_only = True)
     case_id = serializers.IntegerField(write_only = True)
     category_type = serializers.IntegerField(write_only = True)
     image_id = serializers.ListField(write_only = True,  child=serializers.IntegerField())
-    labels = serializers.ListField(write_only = True)
     option = serializers.ListField(write_only = True,  child=serializers.IntegerField())
     options = serializers.ListField(write_only = True)
-    score = serializers.IntegerField(write_only = True)
         
 
 # class CustomSliceSerializer(serializers.Serializer):
@@ -286,13 +285,20 @@ class SessionCreateSerializer(serializers.ModelSerializer):
         except Exception as e:
             return serializers.ValidationError(f"An exception occurred: {e}")
         
-    
+
+class LabelsDataSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    value = serializers.CharField(max_length = 200)
+    checked = serializers.BooleanField()
+    score = serializers.CharField(max_length = 200)
+
 class SessionUpdateSerializer(serializers.ModelSerializer):
     case = CaseSerializer(many = True, read_only = True)
     slices_data = Slice_Fields_Serializer(many = True, write_only = True)
+    labels = LabelsDataSerializer(many = True, write_only = True)
     class Meta:
         model = Session
-        fields = ["id", "session_name", "case", "slices_data"]
+        fields = ["id", "session_name", "case", "slices_data", "labels"]
 
     def to_representation(self, instance):
         # Assuming instance is your data
@@ -301,12 +307,21 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         try:
             slice_data = validated_data.pop("slices_data")
+            label_data = validated_data.pop("labels")
             for slice in slice_data:
                 case_id = slice["case_id"]
                 instance_cases = instance.case.all()
                 for instance_case in instance_cases:
                     
                     if instance_case.id == case_id:
+
+                        for label in label_data:
+                            instance_obj = instance_case.labels.get(id = label["id"])
+                            instance_obj.value = label.get("value")
+                            instance_obj.checked = label.get("checked")
+                            instance_obj.score = label.get("score")
+                            instance_obj.save()
+
                         instance_categories_types = instance_case.category_type.all()
                         for instance_category_type in instance_categories_types:
                             category_type_id = slice["category_type"]
@@ -316,8 +331,6 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                                     image_instance = instance_category_type.image.get(id = validated_image_id)
                                     image_instance.checked = True
                                     image_instance.save()
-                                instance_category_type.score = slice["score"]
-                                instance_category_type.save()
                                 for option in instance_category_type.options.all():
                                     if option.id in slice["option"]:
                                         option.checked = True
@@ -444,9 +457,8 @@ class ProjectSerializer(serializers.ModelSerializer):
 
             for case in list_cases_in_zip:
                 label_list = []
-                
+
                 for i in  range(rows_number):
-                    
                     for label_data in labels_data:
                         label = Labels.objects.create(value=label_data['value'])
                         label_list.append(label)

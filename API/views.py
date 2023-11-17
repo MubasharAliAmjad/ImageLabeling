@@ -113,7 +113,8 @@ class ExportDataview(APIView):
         for case in session.case.all():
             label_string = ""
             for label in case.labels.all():
-                label_string = label.value + "," + label_string
+                if label.checked == True:
+                        label_string = label.value + label_string
             
 
             for category_type in case.category_type.all():
