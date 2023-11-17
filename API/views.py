@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from .models import Project, ZipFile, SliceSession, Session
+from .models import Project, ZipFile, Session
 from .serializers import ProjectSerializer, UnzipSerializer, SessionCreateSerializer,SessionUpdateSerializer
 from rest_framework import viewsets
 from django.http import HttpResponse

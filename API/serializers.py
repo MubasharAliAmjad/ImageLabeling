@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Slice, Image, Category_Type, Labels, Session, Project, Case, Reference_Folder, Options, ZipFile, SliceSession
+from .models import Slice, Image, Category_Type, Labels, Session, Project, Case, Reference_Folder, Options, ZipFile
 import uuid
 from django.conf import settings
 import os, zipfile
@@ -169,6 +169,38 @@ class CaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
         fields = "__all__"
+
+    def to_representation(self, instance):
+        data = super(CaseSerializer, self).to_representation(instance)
+        labels = data['labels']
+        no_of_rows = data["rows_number"]
+        try:
+            no_of_item_in_each_row = len(labels)/no_of_rows
+            count = 1
+            
+            labels_list = []
+            items_list = []
+            for item in labels:
+                items_list.append(item)
+                
+                if count == no_of_item_in_each_row:
+                    labels_list.append(items_list)
+                    items_list = []
+                    count = 0
+                count = count + 1
+
+            data['labels'] = labels_list
+        except:
+            pass
+        
+        
+        
+        
+
+        # custom_field1_dict = {'custom_field1': custom_field1_representation}
+        # data.update(custom_field1_dict)
+
+        return data
         
 
 class SessionCreateSerializer(serializers.ModelSerializer):
@@ -412,9 +444,12 @@ class ProjectSerializer(serializers.ModelSerializer):
 
             for case in list_cases_in_zip:
                 label_list = []
-                for label_data in labels_data:
-                    label = Labels.objects.create(value=label_data['value'])
-                    label_list.append(label)
+                
+                for i in  range(rows_number):
+                    
+                    for label_data in labels_data:
+                        label = Labels.objects.create(value=label_data['value'])
+                        label_list.append(label)
                 if not os.path.isdir(os.path.join(subfolders_path, case)):
                     continue
 

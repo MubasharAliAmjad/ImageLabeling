@@ -33,10 +33,6 @@ class Slice(models.Model):
     created_at = models.DateTimeField(auto_now_add = True)
 
 
-
-class SliceSession(models.Model):
-    slice = models.ManyToManyField(Slice)
-
 class Image(models.Model):
     image = models.ImageField(upload_to='API/dicom_images/')
     checked = models.BooleanField(default=False)
@@ -104,7 +100,6 @@ class Project(models.Model):
     question = models.CharField(max_length=255)
     session = models.ManyToManyField(Session, blank=True)
     created_at = models.DateTimeField(auto_now_add = True)
-    sliceSession = models.ManyToManyField(SliceSession, blank=True)
 
     def __str__(self):
         return self.project_name
