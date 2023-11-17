@@ -8,7 +8,7 @@ from django.utils import timezone
 class Labels(models.Model):
     value = models.CharField(max_length=100, null=True)
     checked = models.BooleanField(default=False)
-    score = models.CharField(max_length=20)
+    score = models.CharField(max_length=20, default=0)
 
     def __str__(self):
         return self.value
