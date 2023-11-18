@@ -25,12 +25,15 @@ class Options(models.Model):
 
 class Slice(models.Model):
     project_name = models.CharField(max_length=200)
-    case_name = models.CharField(max_length=200)
-    category_type_name = models.CharField(max_length=200)
-    image_id = models.PositiveIntegerField(default=0)
-    labels = models.CharField(max_length=500)
-    options = models.CharField(max_length=500)
+    session_name = models.CharField(max_length=200)
+    case_name = models.CharField(max_length=200, null=True)
     created_at = models.DateTimeField(auto_now_add = True)
+    category_type_name = models.CharField(max_length=200, null=True)
+    image_id = models.CharField(max_length=1000, null=True)
+    score = models.CharField(max_length=10, null=True)
+    labels = models.CharField(max_length=500, null=True)
+    options = models.CharField(max_length=500, null=True)
+    
 
 
 class Image(models.Model):
@@ -89,6 +92,7 @@ class Case(models.Model):
 class Session(models.Model):
     case = models.ManyToManyField(Case)
     session_name = models.CharField(max_length=200)
+    slice = models.ManyToManyField(Slice, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add = True)
 
     def __str__(self):

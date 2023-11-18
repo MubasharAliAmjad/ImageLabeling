@@ -292,10 +292,12 @@ class LabelsDataSerializer(serializers.Serializer):
     checked = serializers.BooleanField()
     score = serializers.CharField(max_length = 200)
 
+
 class SessionUpdateSerializer(serializers.ModelSerializer):
     case = CaseSerializer(many = True, read_only = True)
-    slices_data = Slice_Fields_Serializer(many = True, write_only = True)
-    labels = LabelsDataSerializer(many = True, write_only = True)
+    slices_data = Slice_Fields_Serializer(many = True, write_only = True, required=False)
+    labels = LabelsDataSerializer(many = True, write_only = True, required=False)
+    # updated_case_id = serializers.ListField(write_only = True,  child=serializers.IntegerField())
     class Meta:
         model = Session
         fields = ["id", "session_name", "case", "slices_data", "labels"]
@@ -305,41 +307,96 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
         return {"session": [super().to_representation(instance)]}
 
     def update(self, instance, validated_data):
+
         try:
-            slice_data = validated_data.pop("slices_data")
-            label_data = validated_data.pop("labels")
-            for slice in slice_data:
-                case_id = slice["case_id"]
-                instance_cases = instance.case.all()
-                for instance_case in instance_cases:
+            case_id_list = []
+            try:
+                slice_data = validated_data.pop("slices_data")
+                for slice in slice_data:
+                    case_id = slice["case_id"]
+                    if case_id not in case_id_list:
+                        case_id_list.append(case_id)
+                    instance_cases = instance.case.all()
+                    for instance_case in instance_cases:
+                        
+                        if instance_case.id == case_id:
+                            instance_categories_types = instance_case.category_type.all()
+                            for instance_category_type in instance_categories_types:
+                                category_type_id = slice["category_type"]
+                                if instance_category_type.id == category_type_id:
+                                    for image_id in slice["image_id"]:
+                                        validated_image_id = int(image_id)
+                                        image_instance = instance_category_type.image.get(id = validated_image_id)
+                                        image_instance.checked = True
+                                        image_instance.save()
+                                    for option in instance_category_type.options.all():
+                                        if option.id in slice["option"]:
+                                            option.checked = True
+                                            option.save()
+                                        else:
+                                            option.checked = False
+                                            option.save()
+                                    instance.created_at = timezone.now()
                     
-                    if instance_case.id == case_id:
+                                    instance.save()
+            except: 
+                pass
 
-                        for label in label_data:
-                            instance_obj = instance_case.labels.get(id = label["id"])
-                            instance_obj.value = label.get("value")
-                            instance_obj.checked = label.get("checked")
-                            instance_obj.score = label.get("score")
-                            instance_obj.save()
+            label_case_id = []
+            try:
+                label_data = validated_data.pop("labels")
+                for label in label_data:
+                    instance_obj = Labels.objects.get(id = label["id"])
+                    instance_obj.value = label.get("value")
+                    instance_obj.checked = label.get("checked")
+                    instance_obj.score = label.get("score")
+                    instance_obj.save()
+                    
+                    related_cases = instance_obj.case_set.all()
+                    if related_cases[0].id not in label_case_id:
+                        label_case_id.append(related_cases[0].id)
+                    # projects_related_to_session = existing_session.project_set.all()
+            except:
+                pass
 
-                        instance_categories_types = instance_case.category_type.all()
-                        for instance_category_type in instance_categories_types:
-                            category_type_id = slice["category_type"]
-                            if instance_category_type.id == category_type_id:
-                                for image_id in slice["image_id"]:
-                                    validated_image_id = int(image_id)
-                                    image_instance = instance_category_type.image.get(id = validated_image_id)
-                                    image_instance.checked = True
-                                    image_instance.save()
-                                for option in instance_category_type.options.all():
-                                    if option.id in slice["option"]:
-                                        option.checked = True
-                                        option.save()
-                                    else:
-                                        option.checked = False
-                                        option.save()
-                                instance.created_at = timezone.now()
-                                instance.save()
+            
+            if len(case_id_list) > 0:
+                pass
+            else:
+                case_id_list = label_case_id
+
+            for case in case_id_list:
+                case_obj = Case.objects.get(id = case)
+                session_projects = instance.project_set.all()
+                label_string = ""
+                score_string = ""
+                
+                for slice in instance.slice.all():
+                    first_value = slice.score.split(',')[0]
+                    score_string = first_value + "," + score_string
+
+                labels = case_obj.labels.all()
+                for label in labels:
+                    if label.checked == True:
+                        label_string = label.value + "," + label_string
+                    if "_" in label.value:
+                        score_string = label.score + ","  + score_string
+                if score_string.endswith(","):
+                    score_string = score_string[:-1]
+                    
+                for category_type in case_obj.category_type.all():
+                    image_id = ""
+                    for image in category_type.image.all():
+                        image_id = str(image.id) + "," +  image_id
+                    
+                    option_string = ""
+                    for option in category_type.options.all():
+                        option_string = option.value + "," + option_string
+                    slice_obj = Slice.objects.create(project_name = session_projects[0].project_name, session_name = instance.session_name, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = score_string, labels = label_string, options = option_string)
+                    instance_slices = list(instance.slice.all())
+                    instance_slices.append(slice_obj)
+                    instance.slice.set(instance_slices)
+            
 
         except KeyError as e:
             field_name = e.args[0] if e.args else 'unknown'
@@ -453,6 +510,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
             session_list = []
             case_list = []
+            slice_list = []
 
 
             for case in list_cases_in_zip:
@@ -508,6 +566,17 @@ class ProjectSerializer(serializers.ModelSerializer):
                         case_obj.category_type.set(category_type_list)
                         case_obj.save()
                         case_list.append(case_obj)
+
+            # for case in case_list:
+            #     label_string = ""
+            #     for label in case.labels.all():
+            #         label_string = label.value
+            #     for category_type in case.category_type.all():
+            #         image_id = ""
+            #         for image in category_type.image.all():
+            #             image_id = image.id + "," + image_id
+                    
+            #         slice_obj = Slice.objects.create(project_name = project_name, session_name = project_name, case_name = case, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = "0")
         
             session = Session.objects.create(session_name = project_name)
             session.case.add(*case_list)

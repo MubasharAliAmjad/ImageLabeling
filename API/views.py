@@ -97,6 +97,7 @@ class ExportDataview(APIView):
     def get(self, request, id):
         session = Session.objects.get(id = id)
         projects_related_to_session = session.project_set.all()
+        slice_all = session.slice.all()
         
         project_name = projects_related_to_session[0].project_name
         
@@ -110,25 +111,26 @@ class ExportDataview(APIView):
         row = []
 
 
-        for case in session.case.all():
-            label_string = ""
-            for label in case.labels.all():
-                if label.checked == True:
-                        label_string = label.value + label_string
+        # for case in session.case.all():
+        #     label_string = ""
+        #     for label in case.labels.all():
+        #         if label.checked == True:
+        #                 label_string = label.value + label_string
             
 
-            for category_type in case.category_type.all():
-                options = ""
-                for option in category_type.options.all():
-                    if option.checked == True:
-                        options = option.value + options
+        #     for category_type in case.category_type.all():
+        #         options = ""
+        #         for option in category_type.options.all():
+        #             if option.checked == True:
+        #                 options = option.value + options
                 
-                image_id = ""
-                for image in category_type.image.all():
-                    image_id = str(image.id) + "," + image_id
+        #         image_id = ""
+        #         for image in category_type.image.all():
+        #             image_id = str(image.id) + "," + image_id
 
-                row = [project_name, session.session_name, case.case_name, date_time, f"{category_type.category}_{category_type.type}", image_id, category_type.score, label_string, options]
-                csv_data.append(row)
+        for slice in slice_all:
+            row = [slice.project_name, slice.session_name, slice.case_name, date_time, slice.category_type_name, slice.image_id, slice.score, slice.labels, slice.options]
+            csv_data.append(row)
 
         csv_text = "\n".join([",".join(['"{}"'.format(value) for value in row]) for row in csv_data])
 
