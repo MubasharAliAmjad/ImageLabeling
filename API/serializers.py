@@ -133,18 +133,6 @@ class ReferenceFolderSerializer(serializers.ModelSerializer):
         return image_list
 
 
-# class CategoryTypeItemSerializer(serializers.Serializer):
-#     obj_id = serializers.IntegerField()
-#     slice = serializers.IntegerField()
-#     zoom_level = serializers.IntegerField()
-#     options = OptionsSerializer(many = True, write_only = True)
-#     labels = LabelsSerializer(many = True)
-
-# class Slice_Serializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Slice
-#         fields = "__all__"
-
 
 class  Slice_Fields_Serializer(serializers.Serializer):
     # project_id = serializers.IntegerField(write_only = True)
@@ -154,11 +142,6 @@ class  Slice_Fields_Serializer(serializers.Serializer):
     option = serializers.ListField(write_only = True,  child=serializers.IntegerField())
     options = serializers.ListField(write_only = True)
         
-
-# class CustomSliceSerializer(serializers.Serializer):
-#     slices = Slice_Serializer(many = True, read_only = True)
-    
-    
 
 class CaseSerializer(serializers.ModelSerializer):
     category_type = CategoryTypeSerializer(many = True, read_only=True)
@@ -191,13 +174,6 @@ class CaseSerializer(serializers.ModelSerializer):
             data['labels'] = labels_list
         except:
             pass
-        
-        
-        
-        
-
-        # custom_field1_dict = {'custom_field1': custom_field1_representation}
-        # data.update(custom_field1_dict)
 
         return data
         
@@ -245,7 +221,7 @@ class SessionCreateSerializer(serializers.ModelSerializer):
 
                 label_list = []
                 for label in case.labels.all():
-                    label_obj = Labels(value = label.value)
+                    label_obj = Labels(value = label.value, checked = label.checked, score = label.score)
                     label_obj.save()
                     label_list.append(label_obj)
 
@@ -277,7 +253,7 @@ class SessionCreateSerializer(serializers.ModelSerializer):
 
         
         except KeyError as e:
-            return serializers.ValidationError(f"Field '{e.args[0]}' is missing")
+            return serializers.ValidationError(f"Field is missing")
         except IndexError as e:
             return serializers.ValidationError("Index out of range")
         except AttributeError as e:
@@ -355,7 +331,6 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                     related_cases = instance_obj.case_set.all()
                     if related_cases[0].id not in label_case_id:
                         label_case_id.append(related_cases[0].id)
-                    # projects_related_to_session = existing_session.project_set.all()
             except:
                 pass
 
@@ -370,21 +345,46 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                 session_projects = instance.project_set.all()
                 label_string = ""
                 score_string = ""
+                score_list = []
+                no_of_category_type = len(case_obj.category_type.all())
+                instance_score_list = ['' for _ in range(no_of_category_type)]
                 
+                instance_score_index = 0
                 for slice in instance.slice.all():
                     first_value = slice.score.split(',')[0]
-                    score_string = first_value + "," + score_string
+                    score_string = first_value + "," + instance_score_list[instance_score_index]
+                    instance_score_list[instance_score_index] = score_string
+                    instance_score_index = instance_score_index + 1
+                    if instance_score_index == no_of_category_type:
+                        instance_score_index = 0
 
                 labels = case_obj.labels.all()
+                
+                rows_number = case_obj.rows_number
+                cols_number = case_obj.cols_number
+                no_of_item_in_each_row = len(labels)/rows_number
+                count = 0
+                instance_score_index = 0
                 for label in labels:
+                    score_string = instance_score_list[instance_score_index]
                     if label.checked == True:
                         label_string = label.value + "," + label_string
                     if "-" in label.value:
                         score_string = label.score + ","  + score_string
-                if score_string.endswith(","):
-                    score_string = score_string[:-1]
+
+                    count = count + 1
+                    if count == no_of_item_in_each_row:
+                        count = 0
+                        if score_string.endswith(","):
+                            score_string = score_string[:-1]
+
+                        for instance_score_index in range(cols_number):
+                            score_list.append(score_string)
+                        instance_score_index += 1
+
+                        score_string = ""
                     
-                for category_type in case_obj.category_type.all():
+                for category_type, score in zip(case_obj.category_type.all(), score_list):
                     image_id = ""
                     for image in category_type.image.all():
                         image_id = str(image.id) + "," +  image_id
@@ -392,7 +392,8 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                     option_string = ""
                     for option in category_type.options.all():
                         option_string = option.value + "," + option_string
-                    slice_obj = Slice.objects.create(project_name = session_projects[0].project_name, session_name = instance.session_name, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = score_string, labels = label_string, options = option_string)
+                        
+                    slice_obj = Slice.objects.create(project_name = session_projects[0].project_name, session_name = instance.session_name, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = score, labels = label_string, options = option_string)
                     instance_slices = list(instance.slice.all())
                     instance_slices.append(slice_obj)
                     instance.slice.set(instance_slices)
@@ -567,16 +568,6 @@ class ProjectSerializer(serializers.ModelSerializer):
                         case_obj.save()
                         case_list.append(case_obj)
 
-            # for case in case_list:
-            #     label_string = ""
-            #     for label in case.labels.all():
-            #         label_string = label.value
-            #     for category_type in case.category_type.all():
-            #         image_id = ""
-            #         for image in category_type.image.all():
-            #             image_id = image.id + "," + image_id
-                    
-            #         slice_obj = Slice.objects.create(project_name = project_name, session_name = project_name, case_name = case, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = "0")
         
             session = Session.objects.create(session_name = project_name)
             session.case.add(*case_list)

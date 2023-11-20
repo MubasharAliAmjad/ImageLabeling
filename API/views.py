@@ -110,24 +110,6 @@ class ExportDataview(APIView):
         csv_data.append(['Project Name', 'Session Name', 'Case Name', 'TimeStamp', 'Category_Type', 'Image Id', 'Score', 'Labels', 'Options'])
         row = []
 
-
-        # for case in session.case.all():
-        #     label_string = ""
-        #     for label in case.labels.all():
-        #         if label.checked == True:
-        #                 label_string = label.value + label_string
-            
-
-        #     for category_type in case.category_type.all():
-        #         options = ""
-        #         for option in category_type.options.all():
-        #             if option.checked == True:
-        #                 options = option.value + options
-                
-        #         image_id = ""
-        #         for image in category_type.image.all():
-        #             image_id = str(image.id) + "," + image_id
-
         for slice in slice_all:
             row = [slice.project_name, slice.session_name, slice.case_name, date_time, slice.category_type_name, slice.image_id, slice.score, slice.labels, slice.options]
             csv_data.append(row)
