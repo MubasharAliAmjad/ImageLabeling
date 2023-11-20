@@ -379,7 +379,7 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                 for label in labels:
                     if label.checked == True:
                         label_string = label.value + "," + label_string
-                    if "_" in label.value:
+                    if "-" in label.value:
                         score_string = label.score + ","  + score_string
                 if score_string.endswith(","):
                     score_string = score_string[:-1]
