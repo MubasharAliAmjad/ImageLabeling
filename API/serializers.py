@@ -350,6 +350,7 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                 no_of_category_type = len(case_obj.category_type.all())
                 instance_score_list_size = no_of_category_type * len(case_id_list)
                 instance_score_list = ['' for _ in range(instance_score_list_size)]
+                label_list = []
                 instance_score_index = 0
 
                 for slice in instance.slice.all():
@@ -369,7 +370,7 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                 rows_number = case_obj.rows_number
                 cols_number = case_obj.cols_number
                 no_of_item_in_each_row = len(labels)/rows_number
-                count = 1
+                count = 0
                 
                 for label in labels:
                     if label.checked == True:
@@ -377,6 +378,13 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                             label_string = label.value
                         else:
                             label_string = label_string + "," + label.value
+                    count  += 1
+
+                    if no_of_item_in_each_row == count:
+                        for label_index in range(cols_number):
+                            label_list.append(label_string)
+                        label_string = ""
+                        count = 0
 
                 instance_score_index = 0
                 for label in labels:
@@ -406,16 +414,17 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
 
                             score_string = ""
                 
-                for category_type, score in zip(case_obj.category_type.all(), score_list):
+                for category_type, score, label in zip(case_obj.category_type.all(), score_list, label_list):
                     image_id = ""
                     for image in category_type.image.all():
                         image_id = str(image.id) + "," +  image_id
                     
                     option_string = ""
                     for option in category_type.options.all():
-                        option_string = option.value + "," + option_string
+                        if option.checked:
+                            option_string = option.value + "," + option_string
                         
-                    slice_obj = Slice.objects.create(project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = score, labels = label_string, options = option_string)
+                    slice_obj = Slice.objects.create(project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = score, labels = label, options = option_string)
                     instance_slices = list(instance.slice.all())
                     instance_slices.append(slice_obj)
                     instance.slice.set(instance_slices)
