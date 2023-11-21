@@ -26,6 +26,7 @@ class Options(models.Model):
 class Slice(models.Model):
     project_name = models.CharField(max_length=200)
     session_name = models.CharField(max_length=200)
+    case_id = models.PositiveIntegerField(null=True)
     case_name = models.CharField(max_length=200, null=True)
     created_at = models.DateTimeField(auto_now_add = True)
     category_type_name = models.CharField(max_length=200, null=True)
