@@ -352,19 +352,6 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                 instance_score_list = ['' for _ in range(instance_score_list_size)]
                 label_list = []
                 instance_score_index = 0
-
-                for slice in instance.slice.all():
-                    if slice.case_id == case_obj.id:
-                        last_value = slice.score.split(',')[-1]
-                        if not instance_score_list[instance_score_index]:
-                            score_string = last_value
-                        else:
-                            score_string = instance_score_list[instance_score_index] + "," + last_value
-                        instance_score_list[instance_score_index] = score_string
-                        instance_score_index = instance_score_index + 1
-                        if instance_score_index == no_of_category_type:
-                            instance_score_index = 0
-
                 
                 labels = case_obj.labels.all()
                 rows_number = case_obj.rows_number
