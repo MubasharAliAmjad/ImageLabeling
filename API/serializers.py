@@ -373,33 +373,40 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                         label_string = ""
                         count = 0
 
-                instance_score_index = 0
+                # instance_score_index = 0
+                count = 0
                 for label in labels:
-                        
                     if "-" in label.value:
-                        score_string = instance_score_list[instance_score_index]
-                        
+                        # score_string = instance_score_list[instance_score_index]
+                        score_string = label.score
                         if not score_string:
                             score_string = label.score
                         else:
                             score_string = score_string + ","  + label.score
+                    count  += 1
 
-                        if score_string:
+                    if score_string:
                             if score_string.endswith(","):
                                 score_string = score_string[:-1]
 
-                            for instance_score_index in range(cols_number):
-                                score_list.append(score_string)
-                                instance_score_index = instance_score_index
-                                
-                            for index in range(len(score_list) - 2, -1, -1):
-                                if score_list[index] != "":
-                                    instance_score_index = index + 1
-                                    break
-                            
-                            instance_score_index += 1
+                    if no_of_item_in_each_row == count:
+                        for label_index in range(cols_number):
+                            score_list.append(score_string)
+                        score_string = ""
+                        count = 0
 
-                            score_string = ""
+                            # for instance_score_index in range(cols_number):
+                            #     score_list.append(score_string)
+                            #     instance_score_index = instance_score_index
+                                
+                            # for index in range(len(score_list) - 2, -1, -1):
+                            #     if score_list[index] != "":
+                            #         instance_score_index = index + 1
+                            #         break
+                            
+                            # instance_score_index += 1
+
+                            # score_string = ""
                 
                 for category_type, score, label in zip(case_obj.category_type.all(), score_list, label_list):
                     image_id = ""
@@ -410,11 +417,11 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                     for option in category_type.options.all():
                         if option.checked:
                             option_string = option.value + "," + option_string
-                        
-                    slice_obj = Slice.objects.create(project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = score, labels = label, options = option_string)
-                    instance_slices = list(instance.slice.all())
-                    instance_slices.append(slice_obj)
-                    instance.slice.set(instance_slices)
+                    if option_string and  (score or  label):
+                        slice_obj = Slice.objects.create(project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = score, labels = label, options = option_string)
+                        instance_slices = list(instance.slice.all())
+                        instance_slices.append(slice_obj)
+                        instance.slice.set(instance_slices)
             
 
         except KeyError as e:
@@ -460,22 +467,19 @@ class ProjectSerializer(serializers.ModelSerializer):
                                     list_folders.append(file_dir)
         return list_folders
 
-    def find_images(self, list_cases_in_zip, subfolders_path, file_folder):
-        for case in list_cases_in_zip:
-            if os.path.isdir(os.path.join(subfolders_path, case)):
-                if file_folder in os.listdir(os.path.join(subfolders_path, case)):
-                    image_folder_path = os.path.join(subfolders_path, case, file_folder)
-                    list_images = os.listdir(image_folder_path)
-                    return {"list_images": list_images, 
-                            "image_folder_path": image_folder_path}
+    def find_images(self, case, subfolders_path, file_folder):
+        if file_folder in os.listdir(os.path.join(subfolders_path, case)):
+            image_folder_path = os.path.join(subfolders_path, case, file_folder)
+            list_images = os.listdir(image_folder_path)
+            return {"list_images": list_images, 
+                    "image_folder_path": image_folder_path}
                 
-    def create_category_type(self, list_cases_in_zip, subfolders_path, file_folder, row_data, column_data, options_data):
-        images_and_path = self.find_images(list_cases_in_zip, subfolders_path, file_folder)
+    def create_category_type(self, case, subfolders_path, file_folder, row_data, column_data, options_data):
+        images_and_path = self.find_images(case, subfolders_path, file_folder)
         option_list = []
         for option_data in options_data:
             option = Options.objects.create(value=option_data['value'])
             option_list.append(option)
-
         category_type = Category_Type.objects.create(category = row_data, type = column_data)
         category_type.options.set(option_list)
 
@@ -533,17 +537,19 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
             for case in list_cases_in_zip:
+                if not os.path.isdir(os.path.join(subfolders_path, case)):
+                    continue
+                
                 label_list = []
 
                 for i in  range(rows_number):
                     for label_data in labels_data:
                         label = Labels.objects.create(value=label_data['value'])
                         label_list.append(label)
-                if not os.path.isdir(os.path.join(subfolders_path, case)):
-                    continue
-
+                
+                
                 list_folders_in_zip = self.find_list_folders(subfolders_path)
-                images_and_path = self.find_images(list_cases_in_zip, subfolders_path, user_reference_folder)
+                images_and_path = self.find_images(case, subfolders_path, user_reference_folder)
                 
                 reference_obj = Reference_Folder.objects.create(reference_name = user_reference_folder)
                 for image in images_and_path.get("list_images"):
@@ -559,16 +565,17 @@ class ProjectSerializer(serializers.ModelSerializer):
                 
                 category_type_list = []
                 for row_data in rows_list:
+                    
                     for column_data in  columns_list:
                     
                         if f"{row_data}_{column_data}" in list_folders_in_zip:
                             file_folder = f"{row_data}_{column_data}"
-                            category_type = self.create_category_type(list_cases_in_zip, subfolders_path, file_folder, row_data, column_data, options_data)
+                            category_type = self.create_category_type(case, subfolders_path, file_folder, row_data, column_data, options_data)
                             category_type_list.append(category_type)
 
                         elif f"{column_data}_{row_data}" in list_folders_in_zip:
                             file_folder = f"{column_data}_{row_data}"
-                            category_type = self.create_category_type(list_cases_in_zip, subfolders_path, file_folder, column_data, row_data, options_data)
+                            category_type = self.create_category_type(case, subfolders_path, file_folder, column_data, row_data, options_data)
                             category_type_list.append(category_type)
 
                         else:
@@ -586,17 +593,17 @@ class ProjectSerializer(serializers.ModelSerializer):
                 case_obj.save()
                 case_list.append(case_obj)
 
-            slice_list = []
-            for case in case_list:
-                for category_type in case.category_type.all():
-                    image_id = ""
-                    for image in category_type.image.all():
-                        image_id = str(image.id) + "," +  image_id
-                    slice_obj = Slice.objects.create(project_name = project_name, session_name = project_name, case_id = case.id, case_name = case.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = 0, labels = "", options = "")
-                    slice_list.append(slice_obj)
+            # slice_list = []
+            # for case in case_list:
+            #     for category_type in case.category_type.all():
+            #         image_id = ""
+            #         for image in category_type.image.all():
+            #             image_id = str(image.id) + "," +  image_id
+            #         slice_obj = Slice.objects.create(project_name = project_name, session_name = project_name, case_id = case.id, case_name = case.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = 0, labels = "", options = "")
+            #         slice_list.append(slice_obj)
 
             session = Session.objects.create(session_name = project_name)
-            session.slice.set(slice_list)
+            # session.slice.set(slice_list)
             session.case.add(*case_list)
             session_list.append(session)
             project = Project.objects.create(**validated_data)

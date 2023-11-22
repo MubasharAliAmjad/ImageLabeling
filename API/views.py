@@ -111,6 +111,7 @@ class ExportDataview(APIView):
         row = []
 
         for slice in slice_all:
+            # import pdb; pdb.set_trace()
             row = [slice.project_name, slice.session_name, slice.case_name, date_time, slice.category_type_name, slice.image_id, slice.score, slice.labels, slice.options]
             csv_data.append(row)
 
