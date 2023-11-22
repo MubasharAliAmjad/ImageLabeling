@@ -221,7 +221,7 @@ class SessionCreateSerializer(serializers.ModelSerializer):
 
                 label_list = []
                 for label in case.labels.all():
-                    label_obj = Labels(value = label.value, checked = label.checked, score = label.score)
+                    label_obj = Labels(value = label.value)
                     label_obj.save()
                     label_list.append(label_obj)
 
@@ -333,7 +333,6 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                         label_case_id.append(related_cases[0].id)
             except:
                 pass
-
             
             if len(case_id_list) > 0:
                 pass
@@ -379,15 +378,14 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                     if "-" in label.value:
                         # score_string = instance_score_list[instance_score_index]
                         score_string = label.score
-                        if not score_string:
-                            score_string = label.score
-                        else:
-                            score_string = score_string + ","  + label.score
+                        # if not score_string:
+                        #     score_string = label.score
+                        # else:
+                        #     score_string = score_string + ","  + label.score
                     count  += 1
-
-                    if score_string:
-                            if score_string.endswith(","):
-                                score_string = score_string[:-1]
+                    # if score_string:
+                    #         if score_string.endswith(","):
+                    #             score_string = score_string[:-1]
 
                     if no_of_item_in_each_row == count:
                         for label_index in range(cols_number):
