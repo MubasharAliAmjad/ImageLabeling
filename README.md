@@ -13,20 +13,30 @@ The Image Labelling project allows users to label images with relevant tags.
 
 ### Installation
 
-1. Clone the repository:
+Clone the repository:
 
-   ```bash
-   git clone https://github.com/your-username/image-labelling.git
-   cd image-labelling
+```bash
+git clone https://github.com/your-username/image-labelling.git
+cd image-labelling
 
-   ```
+```
 
-2. Install dependencies
-   pip install -r requirements.txt
+### Install dependencies
 
-3. Apply database migrations
-   python manage.py migrate
+    ```bash
 
-4. Usage
+pip install -r requirements.txt
+
+````
+
+### Apply database migrations
+```bash
+python manage.py migrate
+````
+
+### Usage
+
+```bash
    Run the development server with following command.
    python manage.py runserver
+```
