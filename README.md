@@ -22,11 +22,23 @@ The Image Labelling project allows users to label images with relevant tags.
    ```
 
 2. Install dependencies
+
+   ```bash
    pip install -r requirements.txt
 
+   ```
+
 3. Apply database migrations
+
+   ```bash
    python manage.py migrate
+
+   ```
 
 4. Usage
    Run the development server with following command.
+
+   ```bash
    python manage.py runserver
+
+   ```
