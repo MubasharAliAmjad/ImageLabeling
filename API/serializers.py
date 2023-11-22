@@ -469,7 +469,8 @@ class ProjectSerializer(serializers.ModelSerializer):
         if file_folder in os.listdir(os.path.join(subfolders_path, case)):
             image_folder_path = os.path.join(subfolders_path, case, file_folder)
             list_images = os.listdir(image_folder_path)
-            return {"list_images": list_images, 
+            dcm_images = [file for file in list_images if file.lower().endswith('.dcm')]
+            return {"list_images": dcm_images, 
                     "image_folder_path": image_folder_path}
                 
     def create_category_type(self, case, subfolders_path, file_folder, row_data, column_data, options_data):
