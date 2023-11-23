@@ -415,7 +415,7 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                     for option in category_type.options.all():
                         if option.checked:
                             option_string = option.value + "," + option_string
-                    if option_string and  (score or  label):
+                    if option_string or  (score or  label):
                         slice_obj = Slice.objects.create(project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = score, labels = label, options = option_string)
                         instance_slices = list(instance.slice.all())
                         instance_slices.append(slice_obj)
