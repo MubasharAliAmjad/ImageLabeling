@@ -12,6 +12,7 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
 import csv
+from .utilis import delete_cases
 
 # Create your views here.
 
@@ -84,25 +85,11 @@ class ProjectView(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [CustomPermission]
 
-    def delete_cases(session):
-        session_cases = session.case.all()
-        for case in session_cases:
-            case_categories_types = case.category_type.all()
-            for category_type in case_categories_types:
-                category_type.options.all().delete()
-                category_type.image.all().delete()
-            case.category_type.all().delete()
-            case.labels.all().delete()
-            case.reference_folder.image.all().delete()
-            case.reference_folder.delete()
-        session.case.all().delete()
-        session.slice.all().delete()
-
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         instance_sessions = instance.session.all()
         for session in instance_sessions:
-            self.delete_cases(session)
+            delete_cases(session)
         instance.session.all().delete()
         instance.delete()
         return super(ProjectView, self).destroy(request, *args, **kwargs)

@@ -500,6 +500,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         
         try:
+            
             project_name = validated_data.get("project_name")
             zip_folder = validated_data.pop('zip_folder')
             rows_list = validated_data.pop('rows_list')
@@ -525,11 +526,11 @@ class ProjectSerializer(serializers.ModelSerializer):
             
             cols_number = case_data_item[0].get('cols_number')
             rows_number = case_data_item[0].get('rows_number')
-
+            
             labels_data = case_data_item[0].get('labels')
-            options_data = case_data_item[0].pop('options')
+            options_data = case_data_item[0].get('options')
 
-            user_reference_folder = case_data_item[0].pop('reference_folder')
+            user_reference_folder = case_data_item[0].get('reference_folder')
             user_reference_folder = user_reference_folder.get("reference_name")
 
             notes = case_data_item[0].pop('notes')
