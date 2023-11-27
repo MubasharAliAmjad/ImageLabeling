@@ -6,7 +6,7 @@ from django.utils import timezone
 # Create your models here.
 
 class Labels(models.Model):
-    value = models.CharField(max_length=100, null=True)
+    value = models.CharField(max_length=100, null=True, blank=True)
     checked = models.BooleanField(default=False)
     score = models.CharField(max_length=20, default=0)
 
@@ -17,7 +17,7 @@ class ZipFile(models.Model):
     uploaded_file = models.FileField(upload_to="API/ZipFile")
 
 class Options(models.Model):
-    value= models.CharField(max_length=100)
+    value= models.CharField(max_length=100, blank=True, null=True)
     checked = models.BooleanField(default=False)
 
     def __str__(self):
@@ -46,7 +46,7 @@ class Image(models.Model):
         return f'media/{self.image.name}'
     
 class Reference_Folder(models.Model):
-    reference_name = models.CharField(max_length=100)
+    reference_name = models.CharField(max_length=100, null=True, blank=True)
     image = models.ManyToManyField(Image, blank=True)
 
     def __str__(self) :
