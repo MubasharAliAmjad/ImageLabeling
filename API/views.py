@@ -13,6 +13,7 @@ from django.core.files.storage import default_storage
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
 import csv
 from .utilis import delete_cases
+from rest_framework import status
 
 # Create your views here.
 
@@ -92,7 +93,7 @@ class ProjectView(viewsets.ModelViewSet):
             delete_cases(session)
         instance.session.all().delete()
         instance.delete()
-        return super(ProjectView, self).destroy(request, *args, **kwargs)
+        return Response({'message': 'Object deleted successfully'}, status=status.HTTP_200_OK)
     
 class SessionDestroyView(DestroyAPIView):
     serializer_class = SessionCreateSerializer
@@ -108,7 +109,8 @@ class SessionDestroyView(DestroyAPIView):
                 projects_related_to_session[0].delete()
         except:
             pass
-        return super().destroy(request, *args, **kwargs)
+        session.delete()
+        return Response({'message': 'Object deleted successfully'}, status=status.HTTP_200_OK)
 
 
 

@@ -147,7 +147,7 @@ class CaseSerializer(serializers.ModelSerializer):
     category_type = CategoryTypeSerializer(many = True, read_only=True)
     reference_folder = ReferenceFolderSerializer()
     labels = LabelsSerializer(many = True)
-    options = OptionsSerializer(many = True, write_only = True)
+    options = OptionsSerializer(many = True, write_only = True, )
     class Meta:
         model = Case
         fields = "__all__"
