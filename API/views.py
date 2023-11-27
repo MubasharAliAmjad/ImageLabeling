@@ -101,7 +101,7 @@ class SessionDestroyView(DestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         session = self.get_object()
-        ProjectView.delete_cases(session)
+        delete_cases(session)
         projects_related_to_session = session.project_set.all()
         try:
             session_list = projects_related_to_session[0].session.all()
