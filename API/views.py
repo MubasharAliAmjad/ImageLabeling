@@ -10,7 +10,7 @@ import os, zipfile
 import uuid
 from django.conf import settings
 from django.core.files.storage import default_storage
-from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
 import csv
 
 # Create your views here.
@@ -83,6 +83,48 @@ class ProjectView(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [CustomPermission]
+
+    def delete_cases(session):
+        session_cases = session.case.all()
+        for case in session_cases:
+            case_categories_types = case.category_type.all()
+            for category_type in case_categories_types:
+                category_type.options.all().delete()
+                category_type.image.all().delete()
+            case.category_type.all().delete()
+            case.labels.all().delete()
+            case.reference_folder.image.all().delete()
+            case.reference_folder.delete()
+        session.case.all().delete()
+        session.slice.all().delete()
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance_sessions = instance.session.all()
+        for session in instance_sessions:
+            self.delete_cases(session)
+        instance.session.all().delete()
+        instance.delete()
+        return super(ProjectView, self).destroy(request, *args, **kwargs)
+    
+class SessionDestroyView(DestroyAPIView):
+    serializer_class = SessionCreateSerializer
+    queryset = Session.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        session = self.get_object()
+        ProjectView.delete_cases(session)
+        projects_related_to_session = session.project_set.all()
+        try:
+            session_list = projects_related_to_session[0].session.all()
+            if len(session_list)  == 1:
+                projects_related_to_session[0].delete()
+        except:
+            pass
+        return super().destroy(request, *args, **kwargs)
+
+
+
 
 class SessionCreateView(CreateAPIView):
     serializer_class = SessionCreateSerializer

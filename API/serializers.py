@@ -375,17 +375,18 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                 # instance_score_index = 0
                 count = 0
                 for label in labels:
+
                     if "-" in label.value:
                         # score_string = instance_score_list[instance_score_index]
-                        score_string = label.score
-                        # if not score_string:
-                        #     score_string = label.score
-                        # else:
-                        #     score_string = score_string + ","  + label.score
+                        if label.score == '0':
+                            # score_string = label.score
+                            pass
+                        else:
+                            score_string = label.score + ","  + score_string
                     count  += 1
-                    # if score_string:
-                    #         if score_string.endswith(","):
-                    #             score_string = score_string[:-1]
+                    if score_string:
+                            if score_string.endswith(","):
+                                score_string = score_string[:-1]
 
                     if no_of_item_in_each_row == count:
                         for label_index in range(cols_number):
@@ -415,7 +416,10 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                     for option in category_type.options.all():
                         if option.checked:
                             option_string = option.value + "," + option_string
-                    if option_string or  (score or  label):
+
+                    if option_string.endswith(","):
+                                option_string = option_string[:-1]
+                    if not option_string == "" or  (score or  not label == "" ):
                         slice_obj = Slice.objects.create(project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = score, labels = label, options = option_string)
                         instance_slices = list(instance.slice.all())
                         instance_slices.append(slice_obj)
@@ -641,3 +645,4 @@ class ProjectSerializer(serializers.ModelSerializer):
             print(f"Folder '{zip_folder}' does not exist in media.")
             
         return project
+    

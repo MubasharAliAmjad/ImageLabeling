@@ -15,6 +15,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('create_session/', views.SessionCreateView.as_view(), name="create_session"),
     path('update_session/<int:pk>/', views.SessionUpdateView.as_view(), name="update_session"),
+    path('destroy_session/<int:pk>/', views.SessionDestroyView.as_view(), name="destroy_session"),
     path('read_local/', views.ReadFromLocalView.as_view(), name="read_local"),
     # path('slice/', views.CustomSliceView.as_view()),
     path('export_data/<int:id>/', views.ExportDataview.as_view()),
