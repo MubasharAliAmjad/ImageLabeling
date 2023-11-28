@@ -5,7 +5,6 @@ def delete_cases(session):
             for category_type in case_categories_types:
                 category_type.options.all().delete()
                 if category_type.image.all():
-                    # category_type.image.filter().delete()
                     category_type.image.all().delete()
             case.category_type.all().delete()
             case.labels.all().delete()
@@ -13,4 +12,8 @@ def delete_cases(session):
                  case.reference_folder.image.all().delete()
                  case.reference_folder.delete()
         session.case.all().delete()
+        try:
+             session.slice.all().delete()
+        except:
+             pass
         session.slice.all().delete()
