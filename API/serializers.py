@@ -502,21 +502,23 @@ class ProjectSerializer(serializers.ModelSerializer):
     def create_category_type(self, case, subfolders_path, file_folder, row_data, column_data, options_data):
         images_and_path = self.find_images(case, subfolders_path, file_folder)
         option_list = []
+        category_type = Category_Type.objects.create(category = row_data, type = column_data)
         if not len(options_data) == 0:
-            category_type = Category_Type.objects.create(category = row_data, type = column_data)
             for option_data in options_data:
                 option = Options.objects.create(value=option_data['value'])
                 option_list.append(option)
             category_type.options.set(option_list)
-        
 
+        image_list = []
         for image in images_and_path.get("list_images"):
             file_path = os.path.join(images_and_path.get("image_folder_path"), image)
             dicom_file = open(file_path, "rb")
             image = Image(image=File(dicom_file, name=image))
             image.save()
-            category_type.image.add(image)
             dicom_file.close()
+            image_list.append(image)
+        category_type.image.set(image_list)
+        category_type.save()
         return category_type
 
     
@@ -625,17 +627,7 @@ class ProjectSerializer(serializers.ModelSerializer):
                 case_obj.save()
                 case_list.append(case_obj)
 
-            # slice_list = []
-            # for case in case_list:
-            #     for category_type in case.category_type.all():
-            #         image_id = ""
-            #         for image in category_type.image.all():
-            #             image_id = str(image.id) + "," +  image_id
-            #         slice_obj = Slice.objects.create(project_name = project_name, session_name = project_name, case_id = case.id, case_name = case.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = 0, labels = "", options = "")
-            #         slice_list.append(slice_obj)
-
             session = Session.objects.create(session_name = project_name)
-            # session.slice.set(slice_list)
             session.case.add(*case_list)
             session_list.append(session)
             project = Project.objects.create(**validated_data)
