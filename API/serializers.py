@@ -8,6 +8,11 @@ from django.core.files.storage import FileSystemStorage
 from django.core.files.storage import default_storage
 import random
 from django.utils import timezone
+from shutil import copyfile
+from django.core.files import File
+from django.core.files.base import ContentFile
+
+
 
 class UnzipSerializer(serializers.Serializer):
     uploaded_file = serializers.FileField()
@@ -189,7 +194,7 @@ class SessionCreateSerializer(serializers.ModelSerializer):
 
     
     def create(self, validated_data):
-        try:
+        # try:
             session_id = validated_data.pop('session_id')
             session_name = validated_data.pop('session_name')
 
@@ -202,13 +207,22 @@ class SessionCreateSerializer(serializers.ModelSerializer):
                 
                 category_type_list = []
                 for category_type_item in case.category_type.all():
-                    category_type = Category_Type.objects.create(category = category_type_item.category, type = category_type_item.type)
                     image_list = []
+                    category_type = Category_Type.objects.create(category = category_type_item.category, type = category_type_item.type)
                     for image in category_type_item.image.all():
                         
-                        image_obj = Image(image = image.image)
-                        image_obj.save()
-                        category_type.image.add(image)
+                        with open(image.image.path, 'rb') as file:
+                             file_content = file.read()
+                        file_name = os.path.basename(image.image.path)
+                        unique_id = str(uuid.uuid4())
+                        new_name = f"{unique_id}_{file_name}"
+                        new_image_object = Image()
+                        new_image_object.image.save(new_name, ContentFile(file_content), save=True,)
+                        # print("new_image_object: ", new_image_object)
+                        new_image_object.save()
+                        image_list.append(new_image_object)
+                    category_type.image.set(image_list)
+                        
 
                     option_list = []
                     for option in category_type_item.options.all():
@@ -226,12 +240,20 @@ class SessionCreateSerializer(serializers.ModelSerializer):
                     label_list.append(label_obj)
 
                 reference_obj = Reference_Folder.objects.create(reference_name = case.reference_folder.reference_name)
+                reference_image_list = []
                 for image in case.reference_folder.image.all():
+                    with open(image.image.path, 'rb') as file:
+                        file_content = file.read()
+                    file_name = os.path.basename(image.image.path)
+                    unique_id = str(uuid.uuid4())
+                    new_name = f"{unique_id}_{file_name}"
+                    new_image_object = Image()
+                    new_image_object.image.save(new_name, ContentFile(file_content), save=True,)
+                    new_image_object.save()
+                    reference_image_list.append(new_image_object)
 
-                    image_obj = Image(image = image.image)
-                    image_obj.save()
-                    reference_obj.image.add(image)
-                    reference_obj.save()
+                reference_obj.image.set(reference_image_list)
+                reference_obj.save()
                 
                 case_obj = Case.objects.create(case_name = case.case_name, notes = case.notes, cols_number = case.cols_number, rows_number = case.rows_number, reference_folder = reference_obj)
                 case_obj.labels.set(label_list)
@@ -252,14 +274,14 @@ class SessionCreateSerializer(serializers.ModelSerializer):
             return new_session
 
         
-        except KeyError as e:
-            return serializers.ValidationError(f"Field is missing")
-        except IndexError as e:
-            return serializers.ValidationError("Index out of range")
-        except AttributeError as e:
-            return serializers.ValidationError(f"AttributeError, raised during assigning of object: {e}")
-        except Exception as e:
-            return serializers.ValidationError(f"An exception occurred: {e}")
+        # except KeyError as e:
+        #     return serializers.ValidationError(f"Field is missing")
+        # except IndexError as e:
+        #     return serializers.ValidationError("Index out of range")
+        # except AttributeError as e:
+        #     return serializers.ValidationError(f"AttributeError, raised during assigning of object: {e}")
+        # except Exception as e:
+        #     return serializers.ValidationError(f"An exception occurred: {e}")
         
 
 class LabelsDataSerializer(serializers.Serializer):
@@ -281,9 +303,9 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         # Assuming instance is your data
         return {"session": [super().to_representation(instance)]}
+    
 
     def update(self, instance, validated_data):
-
         try:
             case_id_list = []
             try:
@@ -481,11 +503,12 @@ class ProjectSerializer(serializers.ModelSerializer):
         images_and_path = self.find_images(case, subfolders_path, file_folder)
         option_list = []
         if not len(options_data) == 0:
+            category_type = Category_Type.objects.create(category = row_data, type = column_data)
             for option_data in options_data:
                 option = Options.objects.create(value=option_data['value'])
                 option_list.append(option)
             category_type.options.set(option_list)
-        category_type = Category_Type.objects.create(category = row_data, type = column_data)
+        
 
         for image in images_and_path.get("list_images"):
             file_path = os.path.join(images_and_path.get("image_folder_path"), image)
@@ -539,6 +562,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             session_list = []
             case_list = []
             slice_list = []
+            
 
 
             for case in list_cases_in_zip:
