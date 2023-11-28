@@ -224,39 +224,46 @@ class SessionCreateSerializer(serializers.ModelSerializer):
                     category_type.image.set(image_list)
                         
 
-                    option_list = []
-                    for option in category_type_item.options.all():
-                        option_obj = Options(value = option.value)
-                        option_obj.save()
-                        option_list.append(option_obj)
+                    if category_type_item.options.all():
+                        option_list = []
+                        for option in category_type_item.options.all():
+                            option_obj = Options(value = option.value)
+                            option_obj.save()
+                            option_list.append(option_obj)
+                        category_type.options.set(option_list)
 
-                    category_type.options.set(option_list)
                     category_type_list.append(category_type)
 
-                label_list = []
-                for label in case.labels.all():
-                    label_obj = Labels(value = label.value)
-                    label_obj.save()
-                    label_list.append(label_obj)
+                if case.labels.all():
+                    label_list = []
+                    for label in case.labels.all():
+                        label_obj = Labels(value = label.value)
+                        label_obj.save()
+                        label_list.append(label_obj)
 
-                reference_obj = Reference_Folder.objects.create(reference_name = case.reference_folder.reference_name)
-                reference_image_list = []
-                for image in case.reference_folder.image.all():
-                    with open(image.image.path, 'rb') as file:
-                        file_content = file.read()
-                    file_name = os.path.basename(image.image.path)
-                    unique_id = str(uuid.uuid4())
-                    new_name = f"{unique_id}_{file_name}"
-                    new_image_object = Image()
-                    new_image_object.image.save(new_name, ContentFile(file_content), save=True,)
-                    new_image_object.save()
-                    reference_image_list.append(new_image_object)
-
-                reference_obj.image.set(reference_image_list)
-                reference_obj.save()
-                
-                case_obj = Case.objects.create(case_name = case.case_name, notes = case.notes, cols_number = case.cols_number, rows_number = case.rows_number, reference_folder = reference_obj)
-                case_obj.labels.set(label_list)
+                if case.reference_folder:
+                    reference_obj = Reference_Folder.objects.create(reference_name = case.reference_folder.reference_name)
+                    reference_image_list = []
+                    for image in case.reference_folder.image.all():
+                        with open(image.image.path, 'rb') as file:
+                            file_content = file.read()
+                        file_name = os.path.basename(image.image.path)
+                        unique_id = str(uuid.uuid4())
+                        new_name = f"{unique_id}_{file_name}"
+                        new_image_object = Image()
+                        new_image_object.image.save(new_name, ContentFile(file_content), save=True,)
+                        new_image_object.save()
+                        reference_image_list.append(new_image_object)
+                    reference_obj.image.set(reference_image_list)
+                    reference_obj.save()
+                try:
+                    case_obj = Case.objects.create(case_name = case.case_name, notes = case.notes, cols_number = case.cols_number, rows_number = case.rows_number, reference_folder = reference_obj)
+                except:
+                    case_obj = Case.objects.create(case_name = case.case_name, notes = case.notes, cols_number = case.cols_number, rows_number = case.rows_number)
+                try:
+                    case_obj.labels.set(label_list)
+                except:
+                    pass
                 case_obj.category_type.set(category_type_list)
                 case_obj.save()
                 case_list.append(case_obj)
