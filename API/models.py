@@ -78,7 +78,6 @@ class Category_Type(models.Model):
     
 class Case(models.Model):
     case_name = models.CharField(max_length=50)
-    notes = models.TextField(blank=True)
     cols_number = models.PositiveIntegerField()
     rows_number =models.PositiveIntegerField()
     category_type = models.ManyToManyField(Category_Type, blank=True)
@@ -102,6 +101,7 @@ class Session(models.Model):
 class Project(models.Model):
     project_name = models.CharField(max_length=255)
     question = models.CharField(max_length=255)
+    notes = models.TextField(blank=True)
     session = models.ManyToManyField(Session, blank=True)
     created_at = models.DateTimeField(auto_now_add = True)
 

@@ -484,7 +484,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Project
-        fields = ["id", "project_name", "question", "session", "created_at", "zip_folder", "rows_list", "columns_list", "session", "case"]
+        fields = ["id", "project_name", "question", "notes", "session", "created_at", "zip_folder", "rows_list", "columns_list", "session", "case"]
 
 # overriding methods of serializer is useful when you want to apply logic on particular models
 
@@ -539,7 +539,11 @@ class ProjectSerializer(serializers.ModelSerializer):
             rows_list = validated_data.pop('rows_list')
             columns_list = validated_data.pop('columns_list') 
             case_data_item = validated_data.pop("case")
+        except KeyError as e:
+            field_name = e.args[0] if e.args else 'unknown'
+            return serializers.ValidationError(f"Field '{field_name}' is missing")
         
+        try:
             zip_folder_path = os.path.join(settings.MEDIA_ROOT, zip_folder)
             subfolders_names = os.listdir(zip_folder_path)
             if '__MACOSX' in subfolders_names:
@@ -640,9 +644,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             project = Project.objects.create(**validated_data)
             project.session.set(session_list)
 
-        except KeyError as e:
-            field_name = e.args[0] if e.args else 'unknown'
-            return serializers.ValidationError(f"Field '{field_name}' is missing")
+        
         except IndexError as e:
             return serializers.ValidationError("Index out of range")
         except AttributeError as e:
