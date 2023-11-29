@@ -257,9 +257,9 @@ class SessionCreateSerializer(serializers.ModelSerializer):
                     reference_obj.image.set(reference_image_list)
                     reference_obj.save()
                 try:
-                    case_obj = Case.objects.create(case_name = case.case_name, notes = case.notes, cols_number = case.cols_number, rows_number = case.rows_number, reference_folder = reference_obj)
+                    case_obj = Case.objects.create(case_name = case.case_name, cols_number = case.cols_number, rows_number = case.rows_number, reference_folder = reference_obj)
                 except:
-                    case_obj = Case.objects.create(case_name = case.case_name, notes = case.notes, cols_number = case.cols_number, rows_number = case.rows_number)
+                    case_obj = Case.objects.create(case_name = case.case_name, cols_number = case.cols_number, rows_number = case.rows_number)
                 try:
                     case_obj.labels.set(label_list)
                 except:
@@ -570,7 +570,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             user_reference_folder = case_data_item[0].get('reference_folder')
             user_reference_folder = user_reference_folder.get("reference_name")
 
-            notes = case_data_item[0].pop('notes')
+            # notes = validated_data.get("notes")
 
             session_list = []
             case_list = []
@@ -602,9 +602,9 @@ class ProjectSerializer(serializers.ModelSerializer):
                         reference_obj.image.add(image)
                         dicom_file.close()
                 if user_reference_folder:              
-                    case_obj = Case.objects.create(case_name = case, notes = notes, cols_number = cols_number, rows_number = rows_number, randomize_cases = randomize_cases, randomize_categories = randomize_categories, reference_folder = reference_obj)
+                    case_obj = Case.objects.create(case_name = case, cols_number = cols_number, rows_number = rows_number, randomize_cases = randomize_cases, randomize_categories = randomize_categories, reference_folder = reference_obj)
                 else:
-                    case_obj = Case.objects.create(case_name = case, notes = notes, cols_number = cols_number, rows_number = rows_number, randomize_cases = randomize_cases, randomize_categories = randomize_categories)
+                    case_obj = Case.objects.create(case_name = case, cols_number = cols_number, rows_number = rows_number, randomize_cases = randomize_cases, randomize_categories = randomize_categories)
                 if not len(label_list) == 0:
                     case_obj.labels.set(label_list)
                 
