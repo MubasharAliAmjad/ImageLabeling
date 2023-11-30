@@ -92,6 +92,7 @@ class Case(models.Model):
 class Session(models.Model):
     case = models.ManyToManyField(Case)
     session_name = models.CharField(max_length=200)
+    notes = models.TextField(blank=True)
     slice = models.ManyToManyField(Slice, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add = True)
 
@@ -101,7 +102,6 @@ class Session(models.Model):
 class Project(models.Model):
     project_name = models.CharField(max_length=255)
     question = models.CharField(max_length=255)
-    notes = models.TextField(blank=True)
     session = models.ManyToManyField(Session, blank=True)
     created_at = models.DateTimeField(auto_now_add = True)
 

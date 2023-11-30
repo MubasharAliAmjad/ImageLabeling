@@ -190,7 +190,7 @@ class SessionCreateSerializer(serializers.ModelSerializer):
     # session_name = serializers.CharField(max_length = 200, write_only = True)
     class Meta:
         model = Session
-        fields = ["session_id", "session_name", "created_at", "case"]
+        fields = ["session_id", "session_name","notes", "created_at", "case"]
 
     
     def create(self, validated_data):
@@ -200,7 +200,7 @@ class SessionCreateSerializer(serializers.ModelSerializer):
 
             existing_session = Session.objects.get(id = session_id)
 
-            new_session = Session.objects.create(session_name = session_name)
+            new_session = Session.objects.create(session_name = session_name, notes = existing_session.notes)
 
             case_list = []
             for case in existing_session.case.all():
@@ -472,7 +472,7 @@ class SessionSerializer(serializers.ModelSerializer):
     slices_data = Slice_Fields_Serializer(many = True, write_only = True)
     class Meta:
         model = Session
-        fields = ["id", "session_name", "case", "slices_data"]
+        fields = ["id", "session_name","notes", "case", "slices_data"]
 
 class ProjectSerializer(serializers.ModelSerializer):
     zip_folder = serializers.CharField(max_length = 150, write_only = True)
@@ -481,7 +481,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     session = SessionSerializer(many = True, read_only = True)
     case = CaseSerializer(many = True, write_only = True)
-    
+    notes = serializers.CharField(write_only = True)
     class Meta:
         model = Project
         fields = ["id", "project_name", "question", "notes", "session", "created_at", "zip_folder", "rows_list", "columns_list", "session", "case"]
@@ -570,7 +570,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             user_reference_folder = case_data_item[0].get('reference_folder')
             user_reference_folder = user_reference_folder.get("reference_name")
 
-            # notes = validated_data.get("notes")
+            notes = validated_data.get("notes")
 
             session_list = []
             case_list = []
@@ -638,7 +638,7 @@ class ProjectSerializer(serializers.ModelSerializer):
                 case_obj.save()
                 case_list.append(case_obj)
 
-            session = Session.objects.create(session_name = project_name)
+            session = Session.objects.create(session_name = project_name, notes = notes)
             session.case.add(*case_list)
             session_list.append(session)
             project = Project.objects.create(**validated_data)
