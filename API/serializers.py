@@ -478,13 +478,13 @@ class ProjectSerializer(serializers.ModelSerializer):
     zip_folder = serializers.CharField(max_length = 150, write_only = True)
     rows_list = serializers.ListField(max_length = 50, write_only = True)
     columns_list = serializers.ListField(max_length = 50, write_only = True)
+    notes = serializers.CharField(max_length = 500, write_only = True)
 
     session = SessionSerializer(many = True, read_only = True)
     case = CaseSerializer(many = True, write_only = True)
-    notes = serializers.CharField(write_only = True)
     class Meta:
         model = Project
-        fields = ["id", "project_name", "question", "notes", "session", "created_at", "zip_folder", "rows_list", "columns_list", "session", "case"]
+        fields = ["id", "project_name", "question", "session", "created_at", "zip_folder", "rows_list", "columns_list", "notes", "session", "case"]
 
 # overriding methods of serializer is useful when you want to apply logic on particular models
 
@@ -569,7 +569,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
             user_reference_folder = case_data_item[0].get('reference_folder')
             user_reference_folder = user_reference_folder.get("reference_name")
-
+            
             notes = validated_data.get("notes")
 
             session_list = []
@@ -641,7 +641,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             session = Session.objects.create(session_name = project_name, notes = notes)
             session.case.add(*case_list)
             session_list.append(session)
-            project = Project.objects.create(**validated_data)
+            project = Project.objects.create(project_name = project_name, question = validated_data.get("question"))
             project.session.set(session_list)
 
         
