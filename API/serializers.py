@@ -305,7 +305,7 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
     # updated_case_id = serializers.ListField(write_only = True,  child=serializers.IntegerField())
     class Meta:
         model = Session
-        fields = ["id", "session_name", "case", "slices_data", "labels"]
+        fields = ["id", "session_name", "notes", "case", "slices_data", "labels"]
 
     def to_representation(self, instance):
         # Assuming instance is your data
