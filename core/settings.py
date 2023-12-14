@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-$szngl!cfu^8b1qt7x4^ei9qq@0x0-t$nktk*k37#j369er$%#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["*", "backend.pixelpeek.xyz"]
 
 
 # Application definition
@@ -95,15 +95,19 @@ DATABASES = {
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://104.154.218.42",
+    "htpp://pixelpeek.xyz"
     # "https://8d24-119-155-3-247.ngrok-free.app",
 ]
 CORS_ALLOW_CREDENTIALS=True
 # CROSS_ORIGIN_ALLOW_ALL = True
 # CORS_ALLOW_ALL_ORIGINS = True
-# CORS_ORIGIN_WHITELIST = (
-#     'http://localhost:3000',
-# )
-# CSRF_COOKIE_SECURE = False
+CORS_ORIGIN_WHITELIST = (
+    "http://localhost:3000",
+    "http://104.154.218.42",
+    "htpp://pixelpeek.xyz"
+)
+CSRF_COOKIE_SECURE = False
 CORS_ALLOW_HEADERS = (
     # 'Encryption-IV',
     # 'Encryption-Key',
