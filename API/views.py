@@ -108,8 +108,8 @@ class ProjectView(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [CustomPermission]
 
-    def get_serializer_context(self):
-        return {'user_id': self.request.user.id}
+    # def get_serializer_context(self):
+    #     return {'user_id': self.request.user.id}
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

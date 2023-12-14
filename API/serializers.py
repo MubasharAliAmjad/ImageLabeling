@@ -485,22 +485,23 @@ class ProjectSerializer(serializers.ModelSerializer):
     session = SessionSerializer(many = True, read_only = True)
     case = CaseSerializer(many = True, write_only = True)
 
-    user_email = serializers.SerializerMethodField()
+    # user_email = serializers.SerializerMethodField()
     class Meta:
         model = Project
-        fields = ["id", "project_name", "user_email", "question", "session", "created_at", "zip_folder", "rows_list", "columns_list", "notes", "session", "case"]
+        # fields = ["id", "project_name", "user_email", "question", "session", "created_at", "zip_folder", "rows_list", "columns_list", "notes", "session", "case"]
+        fields = ["id", "project_name", "question", "session", "created_at", "zip_folder", "rows_list", "columns_list", "notes", "session", "case"]
 
 
-    def get_user_email(self, obj):
-        # Access the current user from the request's context
-        request = self.context.get('request', None)
-        if request and request.user.is_authenticated:
-            return request.user.email
-        return None
+    # def get_user_email(self, obj):
+    #     # Access the current user from the request's context
+    #     request = self.context.get('request', None)
+    #     if request and request.user.is_authenticated:
+    #         return request.user.email
+    #     return None
     
-    def get_user_email(self, obj):
-        # Access the related CustomUser instance and return its email
-        return obj.user.email
+    # def get_user_email(self, obj):
+    #     # Access the related CustomUser instance and return its email
+    #     return obj.user.email
 
 # overriding methods of serializer is useful when you want to apply logic on particular models
 
@@ -656,10 +657,11 @@ class ProjectSerializer(serializers.ModelSerializer):
             session.case.add(*case_list)
             session_list.append(session)
             
-            user_id = self.context['user_id']
-            user = User.objects.get(id = user_id)
+            # user_id = self.context['user_id']
+            # user = User.objects.get(id = user_id)
             # user = User.objects.get(email = "support@pixelpeek.xyz")
-            project = Project.objects.create(user = user, project_name = project_name, question = validated_data.get("question"))
+            # project = Project.objects.create(user = user, project_name = project_name, question = validated_data.get("question"))
+            project = Project.objects.create(project_name = project_name, question = validated_data.get("question"))
             project.session.set(session_list)
 
         
