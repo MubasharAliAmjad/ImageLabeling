@@ -3,7 +3,15 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 import os
 from django.utils import timezone
+from django.contrib.auth.models import AbstractUser
 # Create your models here.
+
+class CustomUser(AbstractUser):
+    email = models.EmailField(unique=True)
+    
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+
 
 class Labels(models.Model):
     value = models.CharField(max_length=100, null=True, blank=True)
@@ -100,6 +108,7 @@ class Session(models.Model):
         return f"sesion {self.id}"
 
 class Project(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     project_name = models.CharField(max_length=255)
     question = models.CharField(max_length=255)
     session = models.ManyToManyField(Session, blank=True)
@@ -114,3 +123,7 @@ def delete_image_file(sender, instance, **kwargs):
     if instance.image:
         if os.path.isfile(instance.image.path):
             os.remove(instance.image.path) 
+
+
+
+

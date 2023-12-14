@@ -1,0 +1,9 @@
+<Attributes xmlns="urn:oasis:names:tc:SAML:2.0:assertion">
+    <!-- Map the 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress' format to the 'email' attribute -->
+    <Attribute
+        Name="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
+        NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
+        FriendlyName="email"
+    />
+    <!-- You can add more attribute mappings as needed -->
+</Attributes>

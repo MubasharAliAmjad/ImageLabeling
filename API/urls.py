@@ -17,6 +17,8 @@ urlpatterns = [
     path('update_session/<int:pk>/', views.SessionUpdateView.as_view(), name="update_session"),
     path('destroy_session/<int:pk>/', views.SessionDestroyView.as_view(), name="destroy_session"),
     path('read_local/', views.ReadFromLocalView.as_view(), name="read_local"),
+    path('saml/', views.LoginSAMLView.as_view(), name="saml"),
+    path('saml_response/', views.SAMLResponseView.as_view(), name="saml_response"),
     # path('slice/', views.CustomSliceView.as_view()),
     path('export_data/<int:id>/', views.ExportDataview.as_view()),
 ]

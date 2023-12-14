@@ -1,6 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rest_framework.response import Response
-from .models import Project, ZipFile, Session
+from .models import Project, ZipFile, Session, CustomUser
 from .serializers import ProjectSerializer, UnzipSerializer, SessionCreateSerializer,SessionUpdateSerializer
 from rest_framework import viewsets
 from django.http import HttpResponse
@@ -14,8 +14,30 @@ from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, Destro
 import csv
 from .utilis import delete_cases
 from rest_framework import status
-
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import get_user_model
+User = get_user_model()
 # Create your views here.
+
+class LoginSAMLView(APIView):
+    def get(self, request):
+        return redirect("https://backend.pixelpeek.xyz/saml2/login")
+
+
+class SAMLResponseView(APIView):
+    def get(self, request):
+        user = request.user
+        email = request.user.email
+        try:
+            existing_user = User.objects.get(email = email)
+            all_projects = Project.objects.filter(user = existing_user)
+            serializer = ProjectSerializer(all_projects, many=True)
+            return Response(serializer.data)
+        except Project.DoesNotExist:
+            return Response(status=204)
+        except Exception as e:
+            return Response(status=500)
+
 
 class UnZipView(viewsets.ViewSet):
     serializer_class = UnzipSerializer
@@ -85,6 +107,9 @@ class ProjectView(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [CustomPermission]
+
+    def get_serializer_context(self):
+        return {'user_id': self.request.user.id}
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

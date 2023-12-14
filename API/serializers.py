@@ -11,6 +11,8 @@ from django.utils import timezone
 from shutil import copyfile
 from django.core.files import File
 from django.core.files.base import ContentFile
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 
@@ -482,9 +484,23 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     session = SessionSerializer(many = True, read_only = True)
     case = CaseSerializer(many = True, write_only = True)
+
+    user_email = serializers.SerializerMethodField()
     class Meta:
         model = Project
-        fields = ["id", "project_name", "question", "session", "created_at", "zip_folder", "rows_list", "columns_list", "notes", "session", "case"]
+        fields = ["id", "project_name", "user_email", "question", "session", "created_at", "zip_folder", "rows_list", "columns_list", "notes", "session", "case"]
+
+
+    def get_user_email(self, obj):
+        # Access the current user from the request's context
+        request = self.context.get('request', None)
+        if request and request.user.is_authenticated:
+            return request.user.email
+        return None
+    
+    def get_user_email(self, obj):
+        # Access the related CustomUser instance and return its email
+        return obj.user.email
 
 # overriding methods of serializer is useful when you want to apply logic on particular models
 
@@ -533,7 +549,6 @@ class ProjectSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         
         try:
-            
             project_name = validated_data.get("project_name")
             zip_folder = validated_data.pop('zip_folder')
             rows_list = validated_data.pop('rows_list')
@@ -612,7 +627,6 @@ class ProjectSerializer(serializers.ModelSerializer):
                 for row_data in rows_list:
                     
                     for column_data in  columns_list:
-                    
                         if f"{row_data}_{column_data}" in list_folders_in_zip:
                             file_folder = f"{row_data}_{column_data}"
                             category_type = self.create_category_type(case, subfolders_path, file_folder, row_data, column_data, options_data)
@@ -637,11 +651,15 @@ class ProjectSerializer(serializers.ModelSerializer):
                 case_obj.category_type.set(category_type_list)
                 case_obj.save()
                 case_list.append(case_obj)
-
+            
             session = Session.objects.create(session_name = project_name, notes = notes)
             session.case.add(*case_list)
             session_list.append(session)
-            project = Project.objects.create(project_name = project_name, question = validated_data.get("question"))
+            
+            user_id = self.context['user_id']
+            user = User.objects.get(id = user_id)
+            # user = User.objects.get(email = "support@pixelpeek.xyz")
+            project = Project.objects.create(user = user, project_name = project_name, question = validated_data.get("question"))
             project.session.set(session_list)
 
         

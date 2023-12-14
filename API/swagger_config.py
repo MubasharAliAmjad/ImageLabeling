@@ -5,9 +5,9 @@ from rest_framework import permissions
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Image Labeling",
+        title="Pixel Peek",
         default_version="v1",
-        description="Testing unzip file api and save data of project along with images",
+        description="DICOM Image Viewer",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="contact@snippets.local"),
         license=openapi.License(name="BSD License")
