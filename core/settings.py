@@ -102,7 +102,8 @@ DATABASES = {
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    # "https://8d24-119-155-3-247.ngrok-free.app",
+    "https://backend.pixelpeek.xyz",
+    'https://www.pixelpeek.xyz'
 ]
 CORS_ALLOW_CREDENTIALS=True
 # CROSS_ORIGIN_ALLOW_ALL = True
@@ -110,7 +111,8 @@ CORS_ALLOW_CREDENTIALS=True
 CORS_ORIGIN_WHITELIST = (
     "http://localhost:3000",
     "http://104.154.218.42",
-    "htpp://pixelpeek.xyz"
+    "https://www.pixelpeek.xyz",
+    "https://backend.pixelpeek.xyz"
 )
 CSRF_COOKIE_SECURE = False
 CORS_ALLOW_HEADERS = (
