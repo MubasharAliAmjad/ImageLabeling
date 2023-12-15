@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'djangosaml2',
 ]
 
-MIDDLEWARE = [    
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware', 
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -59,7 +60,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'djangosaml2.middleware.SamlSessionMiddleware'
 ]
 
@@ -102,27 +102,29 @@ DATABASES = {
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://backend.pixelpeek.xyz",
-    'https://www.pixelpeek.xyz'
+    "https://127c-119-155-5-216.ngrok-free.app",
+    'https://www.pixelpeek.xyz',
+    'http://127.0.0.1:8000'
 ]
 CORS_ALLOW_CREDENTIALS=True
 CROSS_ORIGIN_ALLOW_ALL = True
 # CORS_ALLOW_ALL_ORIGINS = True
 CORS_ORIGIN_WHITELIST = (
     "http://localhost:3000",
+    'http://127.0.0.1:8000',
     "http://104.154.218.42",
     "https://www.pixelpeek.xyz",
-    "https://backend.pixelpeek.xyz"
+    "https://127c-119-155-5-216.ngrok-free.app"
 )
 CSRF_COOKIE_SECURE = False
-CORS_ALLOW_HEADERS = (
-    # 'Encryption-IV',
-    # 'Encryption-Key',
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-)
-CSRF_TRUSTED_ORIGINS = ['https://backend.pixelpeek.xyz']
+# CORS_ALLOW_HEADERS = (
+#     # 'Encryption-IV',
+#     # 'Encryption-Key',
+#     'Content-Type',
+#     'Authorization',
+#     'X-Requested-With',
+# )
+CSRF_TRUSTED_ORIGINS = ['https://127c-119-155-5-216.ngrok-free.app']
 
 
 CORS_ALLOW_METHODS = [
@@ -215,10 +217,10 @@ SAML_CONFIG = {
   'xmlsec_binary': '/usr/bin/xmlsec1',
 
   # your entity id, usually your subdomain plus the url to the metadata view
-  'entityid': 'https://backend.pixelpeek.xyz',
-'attribute_mapping': {
+  'entityid': 'https://127c-119-155-5-216.ngrok-free.app',
+  'attribute_mapping': {
     'email': ('uid',),
-},
+   },
 
   # directory with attribute mapping
 #   'attribute_map_dir': path.join(BASE_DIR, 'attrmap'),
@@ -248,16 +250,16 @@ SAML_CONFIG = {
               # url and binding to the assetion consumer service view
               # do not change the binding or service name
               'assertion_consumer_service': [
-                  ('https://backend.pixelpeek.xyz/saml2/acs/',
+                  ('https://127c-119-155-5-216.ngrok-free.app/saml2/acs/',
                    saml2.BINDING_HTTP_POST),
                   ],
               # url and binding to the single logout service view
               # do not change the binding or service name
               'single_logout_service': [
                   # Disable next two lines for HTTP_REDIRECT for IDP's that only support HTTP_POST. Ex. Okta:
-                  ('https://backend.pixelpeek.xyz/saml2/ls/',
+                  ('https://127c-119-155-5-216.ngrok-free.app/saml2/ls/',
                    saml2.BINDING_HTTP_REDIRECT),
-                  ('https://backend.pixelpeek.xyz/saml2/ls/post',
+                  ('https://127c-119-155-5-216.ngrok-free.app/saml2/ls/post',
                    saml2.BINDING_HTTP_POST),
                   ],
               },

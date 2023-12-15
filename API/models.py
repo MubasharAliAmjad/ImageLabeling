@@ -32,6 +32,7 @@ class Options(models.Model):
         return self.value
 
 class Slice(models.Model):
+    # email = models.EmailField()
     project_name = models.CharField(max_length=200)
     session_name = models.CharField(max_length=200)
     case_id = models.PositiveIntegerField(null=True)
