@@ -32,7 +32,7 @@ SECRET_KEY = 'django-insecure-$szngl!cfu^8b1qt7x4^ei9qq@0x0-t$nktk*k37#j369er$%#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ["*", "https://fb7a-119-155-5-216.ngrok-free.app"]
+ALLOWED_HOSTS = ["*", "https://backend.pixelpeek.xyz/"]
 
 
 # Application definition
@@ -216,7 +216,7 @@ SAML_CONFIG = {
   'xmlsec_binary': '/usr/bin/xmlsec1',
 
   # your entity id, usually your subdomain plus the url to the metadata view
-  'entityid': 'https://fb7a-119-155-5-216.ngrok-free.app',
+  'entityid': 'https://backend.pixelpeek.xyz/',
   'attribute_mapping': {
     'email': ('uid',),
    },
@@ -249,16 +249,16 @@ SAML_CONFIG = {
               # url and binding to the assetion consumer service view
               # do not change the binding or service name
               'assertion_consumer_service': [
-                  ('https://fb7a-119-155-5-216.ngrok-free.app/api/saml2/acs/',
+                  ('https://backend.pixelpeek.xyz/api/saml2/acs/',
                    saml2.BINDING_HTTP_POST),
                   ],
               # url and binding to the single logout service view
               # do not change the binding or service name
               'single_logout_service': [
                   # Disable next two lines for HTTP_REDIRECT for IDP's that only support HTTP_POST. Ex. Okta:
-                  ('https://fb7a-119-155-5-216.ngrok-free.app/api/saml2/ls/',
+                  ('https://backend.pixelpeek.xyz/api/saml2/ls/',
                    saml2.BINDING_HTTP_REDIRECT),
-                  ('https://fb7a-119-155-5-216.ngrok-free.app/api/saml2/ls/post',
+                  ('https://backend.pixelpeek.xyz/api/saml2/ls/post',
                    saml2.BINDING_HTTP_POST),
                   ],
               },
