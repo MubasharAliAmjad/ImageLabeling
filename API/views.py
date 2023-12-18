@@ -151,17 +151,17 @@ class SessionUpdateView(RetrieveUpdateAPIView):
     serializer_class = SessionUpdateSerializer
     queryset = Session.objects.all()
     
-    def get(self, request, *args, **kwargs):
-        instance = self.get_object()
-        session_serializer = SessionUpdateSerializer(instance)
-        serialized_session = session_serializer.data
-        session_projects = instance.project_set.all()
-        question = session_projects[0].question
-        context = {
-            "session": serialized_session,
-            "question": question
-        }
-        return Response(context)
+    # def get(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     session_serializer = SessionUpdateSerializer(instance)
+    #     serialized_session = session_serializer.data
+    #     session_projects = instance.project_set.all()
+    #     question = session_projects[0].question
+    #     context = {
+    #         "session": serialized_session,
+    #         "question": question
+    #     }
+    #     return Response(context)
 
     
 class ExportDataview(APIView):

@@ -309,15 +309,15 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
         model = Session
         fields = ["id", "session_name", "notes", "case", "slices_data", "labels"]
 
-    # def get_session_projects(self, instance):
+
+    # def get_project_question(self, instance):
         
     #     session_projects = instance.project_set.all()
-    #     # You can customize the serialization of each project here if needed
     #     return session_projects[0].question
 
     # def to_representation(self, instance):
     #     representation = super().to_representation(instance)
-    #     representation['question'] = self.get_session_projects(instance)
+    #     representation['question'] = self.get_project_question(instance)
     #     return representation
     
 
