@@ -265,6 +265,7 @@ SAML_CONFIG = {
 
           'signing_algorithm':  saml2.xmldsig.SIG_RSA_SHA256,
           'digest_algorithm':  saml2.xmldsig.DIGEST_SHA256,
+          
 
            # Mandates that the identity provider MUST authenticate the
            # presenter directly rather than rely on a previous security context.
