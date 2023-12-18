@@ -310,10 +310,15 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
         fields = ["id", "session_name", "notes", "case", "slices_data", "labels"]
 
 
-    # def get_project_question(self, instance):
+    def get_project_question(self, instance):
         
-    #     session_projects = instance.project_set.all()
-    #     return session_projects[0].question
+        session_projects = instance.project_set.all()
+        return session_projects[0].question
+
+    def to_representation(self, instance):
+        # Assuming instance is your data
+        return {"session": [super().to_representation(instance)],
+        "question": self.get_project_question(instance)}
 
     # def to_representation(self, instance):
     #     representation = super().to_representation(instance)
