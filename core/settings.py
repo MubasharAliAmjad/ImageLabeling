@@ -252,6 +252,7 @@ SAML_CONFIG = {
                   ('https://backend.pixelpeek.xyz/api/saml2/acs/',
                    saml2.BINDING_HTTP_POST),
                   ],
+                  # comment
               # url and binding to the single logout service view
               # do not change the binding or service name
               'single_logout_service': [
@@ -265,7 +266,7 @@ SAML_CONFIG = {
 
           'signing_algorithm':  saml2.xmldsig.SIG_RSA_SHA256,
           'digest_algorithm':  saml2.xmldsig.DIGEST_SHA256,
-          
+
 
            # Mandates that the identity provider MUST authenticate the
            # presenter directly rather than rely on a previous security context.
