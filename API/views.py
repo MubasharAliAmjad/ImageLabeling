@@ -17,12 +17,13 @@ from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model
 User = get_user_model()
+
 # Create your views here.
 
 class LoginSAMLView(APIView):
     def get(self, request):
-        import pdb; pdb.set_trace()
-        return redirect("https://127c-119-155-5-216.ngrok-free.app/saml2/login")
+        # import pdb; pdb.set_trace()
+        return redirect("https://fb7a-119-155-5-216.ngrok-free.app/saml2/login")
 
 
 class SAMLResponseView(APIView):
@@ -149,6 +150,7 @@ class SessionCreateView(CreateAPIView):
 class SessionUpdateView(RetrieveUpdateAPIView):
     serializer_class = SessionUpdateSerializer
     queryset = Session.objects.all()
+
     
 class ExportDataview(APIView):
     def get(self, request, id):
