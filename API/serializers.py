@@ -336,7 +336,7 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                     try:
                         image_index_list.append(slice.get("image_id")[0])
                     except:
-                        pass
+                        image_index_list.append(-1)
                     
                     case_id = slice["case_id"]
                     if case_id not in case_id_list:
@@ -468,7 +468,11 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                     if option_string.endswith(","):
                                 option_string = option_string[:-1]
                     if not option_string == "" or  (score or  not label == "" ):
-                        slice_obj = Slice.objects.create(project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = score, labels = label, options = option_string)
+                        if image_id == "-1":
+                            slice_obj = Slice.objects.create(project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", score = score, labels = label, options = option_string)
+                        else:
+                            slice_obj = Slice.objects.create(project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = score, labels = label, options = option_string)
+
                         # slice_obj = Slice.objects.create(email = session_projects[0].user.email, project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = score, labels = label, options = option_string)
                         instance_slices = list(instance.slice.all())
                         instance_slices.append(slice_obj)
