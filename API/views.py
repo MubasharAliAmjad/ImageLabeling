@@ -201,7 +201,9 @@ class ExportDataview(APIView):
         
         project_name = projects_related_to_session[0].project_name
         
-        date_time = session.created_at.strftime("%d:%m:%Y %I:%M %p")
+        # date_time = session.created_at.strftime("%d:%m:%Y %I:%M %p")
+        date_time = session.created_at.strftime("%d:%m:%Y %I:%M:%S %p")
+
         
         title = f"{project_name}-{date_time}.csv"
         response = HttpResponse(content_type='text/csv')
