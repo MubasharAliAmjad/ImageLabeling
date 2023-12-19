@@ -62,13 +62,13 @@ class SAMLResponseView(APIView):
         try:
             existing_user = User.objects.get(email = email)
             all_projects = Project.objects.filter(user = existing_user)
-            serializer = ProjectSerializer(all_projects, many=True)
+            # serializer = ProjectSerializer(all_projects, many=True)
             response_data = {
                 'success': True,
                 'user_data': {
                     # 'username': user.username,
                     'email': email,
-                    'projects': serializer.data,
+                    # 'projects': serializer.data,
                     # Add other user-related data as needed
                 }
             }
