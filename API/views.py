@@ -67,7 +67,7 @@ class SAMLResponseView(APIView):
                 'success': True,
                 'user_data': {
                     # 'username': user.username,
-                    'email': user.email,
+                    'email': email,
                     'projects': serializer.data,
                     # Add other user-related data as needed
                 }
