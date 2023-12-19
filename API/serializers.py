@@ -333,8 +333,10 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
             try:
                 slice_data = validated_data.pop("slices_data")
                 for slice in slice_data:
-                    
-                    image_index_list.append(slice.get("image_id")[0])
+                    try:
+                        image_index_list.append(slice.get("image_id")[0])
+                    except:
+                        pass
                     
                     case_id = slice["case_id"]
                     if case_id not in case_id_list:
