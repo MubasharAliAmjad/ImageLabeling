@@ -44,7 +44,7 @@ class JsonLoginView(LoginView):
         json_data = {
             'action_url': action_url,
             'saml_request': saml_request,
-            'relay_state': 'https://www.pixelpeek.xyz/sign-in',  # customize as needed
+            'relay_state': '/api/saml_response/',  # customize as needed
         }
 
         return JsonResponse(json_data)
