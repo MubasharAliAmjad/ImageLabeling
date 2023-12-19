@@ -3,10 +3,11 @@ from rest_framework.response import Response
 from .models import Project, ZipFile, Session, CustomUser
 from .serializers import ProjectSerializer, UnzipSerializer, SessionCreateSerializer,SessionUpdateSerializer
 from rest_framework import viewsets
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .request_permissions import CustomPermission
 from rest_framework.views import APIView
 import os, zipfile
+from django.views import View
 import uuid
 from django.conf import settings
 from django.core.files.storage import default_storage
@@ -17,8 +18,36 @@ from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model
 User = get_user_model()
+# from djangosaml2.views import LoginView
 
-# Create your views here.
+# # Create your views here.
+
+# class JsonLoginView(LoginView):
+#     def get(self, request, *args, **kwargs):
+#         # Call the parent get method to perform the SAML login
+#         response = super().get(request, *args, **kwargs)
+
+#         # Extract data from the HTML response
+#         html_content = response.content.decode('utf-8')
+
+#         # Extract relevant information from the HTML (customize as needed)
+#         # For demonstration purposes, extracting the action URL and SAMLRequest
+#         action_url_start = html_content.find('action="') + len('action="')
+#         action_url_end = html_content.find('"', action_url_start)
+#         action_url = html_content[action_url_start:action_url_end]
+
+#         saml_request_start = html_content.find('name="SAMLRequest" value="') + len('name="SAMLRequest" value="')
+#         saml_request_end = html_content.find('"', saml_request_start)
+#         saml_request = html_content[saml_request_start:saml_request_end]
+
+#         # Construct JSON response
+#         json_data = {
+#             'action_url': action_url,
+#             'saml_request': saml_request,
+#             'relay_state': '/api/saml_response/',  # customize as needed
+#         }
+
+#         return JsonResponse(json_data)
 
 class LoginSAMLView(APIView):
     def get(self, request):

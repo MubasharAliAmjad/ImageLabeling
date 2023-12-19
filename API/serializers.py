@@ -329,9 +329,12 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         try:
             case_id_list = []
+            image_index_list = []
             try:
                 slice_data = validated_data.pop("slices_data")
                 for slice in slice_data:
+                    image_index_list.append(slice.get("image_id")[0])
+                    
                     case_id = slice["case_id"]
                     if case_id not in case_id_list:
                         case_id_list.append(case_id)
@@ -450,10 +453,9 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
 
                             # score_string = ""
                 
-                for category_type, score, label in zip(case_obj.category_type.all(), score_list, label_list):
-                    image_id = ""
-                    for image in category_type.image.all():
-                        image_id = str(image.id) + "," +  image_id
+                for index, (category_type, score, label) in enumerate(zip(case_obj.category_type.all(), score_list, label_list)):
+                    
+                    image_id = str(image_index_list[index])
                     
                     option_string = ""
                     for option in category_type.options.all():

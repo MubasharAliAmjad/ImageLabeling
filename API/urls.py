@@ -21,5 +21,6 @@ urlpatterns = [
     path('saml_response/', views.SAMLResponseView.as_view(), name="saml_response"),
     # path('slice/', views.CustomSliceView.as_view()),
     path('export_data/<int:id>/', views.ExportDataview.as_view()),
+    # path('saml2/login/', views.JsonLoginView.as_view(), name="login"),
     path('saml2/', include('djangosaml2.urls'), name="saml2_login"),
 ]

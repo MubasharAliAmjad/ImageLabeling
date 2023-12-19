@@ -42,3 +42,11 @@ The Image Labelling project allows users to label images with relevant tags.
    python manage.py runserver
 
    ```
+
+'''if xmlsec raise error'''
+'''do following'''
+'''sudo apt-get install python3-dev
+sudo apt-get install pkg-config
+sudo apt-get install libxmlsec1-dev
+udo apt-get install build-essential
+sudo apt-get install python3-dev'''
