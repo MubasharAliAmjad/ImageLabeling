@@ -63,11 +63,23 @@ class SAMLResponseView(APIView):
             existing_user = User.objects.get(email = email)
             all_projects = Project.objects.filter(user = existing_user)
             serializer = ProjectSerializer(all_projects, many=True)
-            return Response(serializer.data)
+            response_data = {
+                'success': True,
+                'user_data': {
+                    # 'username': user.username,
+                    'email': user.email,
+                    'projects': serializer.data,
+                    # Add other user-related data as needed
+                }
+            }
+
+            return Response(response_data)
         except Project.DoesNotExist:
-            return Response(status=204)
+            # Modify the response to include success status (SAML successful, but user has no projects)
+            return Response({'success': True, 'user_data': None}, status=204)
         except Exception as e:
-            return Response(status=500)
+            # Modify the response to indicate failure (SAML authentication failed)
+            return Response({'success': False, 'error_message': str(e)}, status=500)
 
 
 class UnZipView(viewsets.ViewSet):
