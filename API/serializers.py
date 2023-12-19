@@ -333,6 +333,7 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
             try:
                 slice_data = validated_data.pop("slices_data")
                 for slice in slice_data:
+                    
                     image_index_list.append(slice.get("image_id")[0])
                     
                     case_id = slice["case_id"]
@@ -346,11 +347,11 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                             for instance_category_type in instance_categories_types:
                                 category_type_id = slice["category_type"]
                                 if instance_category_type.id == category_type_id:
-                                    for image_id in slice["image_id"]:
-                                        validated_image_id = int(image_id)
-                                        image_instance = instance_category_type.image.get(id = validated_image_id)
-                                        image_instance.checked = True
-                                        image_instance.save()
+                                    # for image_id in slice["image_id"]:
+                                    #     validated_image_id = int(image_id)
+                                    #     image_instance = instance_category_type.image.get(id = validated_image_id)
+                                    #     image_instance.checked = True
+                                    #     image_instance.save()
                                     for option in instance_category_type.options.all():
                                         if option.id in slice["option"]:
                                             option.checked = True
