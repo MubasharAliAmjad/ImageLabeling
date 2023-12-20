@@ -207,7 +207,7 @@ SAML_USE_NAME_ID_AS_USERNAME = False
 SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'email'
 SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
 SAML_CREATE_UNKNOWN_USER = True 
-ACS_DEFAULT_REDIRECT_URL = reverse_lazy('saml_response')
+ACS_DEFAULT_REDIRECT_URL = reverse_lazy('https://www.pixelpeek.xyz/')
 SAML_ATTRIBUTE_MAPPING = {
     # 'uid': ('username', ),
     'email': ('email', ),
