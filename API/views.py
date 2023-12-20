@@ -74,6 +74,7 @@ class SAMLResponseView(APIView):
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
             return redirect('http://localhost:3000/sign-in?token=' + access_token)
+            #fhdfh
 
 
         # return Response({'token': access_token})
