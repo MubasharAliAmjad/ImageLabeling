@@ -19,7 +19,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from djangosaml2.views import LoginView
-
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 # Create your views here.
 
 class JsonLoginView(LoginView):
@@ -54,32 +57,39 @@ class LoginSAMLView(APIView):
         # import pdb; pdb.set_trace()
         return redirect("https://fb7a-119-155-5-216.ngrok-free.app/saml2/login")
 
-
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
 class SAMLResponseView(APIView):
     def get(self, request):
         user = request.user
         email = request.user.email
-        try:
-            # existing_user = User.objects.get(email = email)
-            # all_projects = Project.objects.filter(user = existing_user)
-            # serializer = ProjectSerializer(all_projects, many=True)
-            response_data = {
-                'success': True,
-                # 'user_data': {
-                #     # 'username': user.username,
-                #     'email': email,
-                #     # 'projects': serializer.data,
-                #     # Add other user-related data as needed
-                # }
-            }
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        return redirect('https://www.pixelpeek.xyz/sign-in?token=' + access_token)
 
-            return Response(response_data, status=200)
-        except Project.DoesNotExist:
-            # Modify the response to include success status (SAML successful, but user has no projects)
-            return Response({'success': True, 'user_data': None}, status=204)
-        except Exception as e:
-            # Modify the response to indicate failure (SAML authentication failed)
-            return Response({'success': False, 'error_message': str(e)}, status=500)
+        # return Response({'token': access_token})
+        # return Response({'token': access_token, 'user_data': user_data})
+        # try:
+        #     # existing_user = User.objects.get(email = email)
+        #     # all_projects = Project.objects.filter(user = existing_user)
+        #     # serializer = ProjectSerializer(all_projects, many=True)
+        #     response_data = {
+        #         'success': True,
+        #         # 'user_data': {
+        #         #     # 'username': user.username,
+        #         #     'email': email,
+        #         #     # 'projects': serializer.data,
+        #         #     # Add other user-related data as needed
+        #         # }
+        #     }
+
+        #     return Response(response_data, status=200)
+        # except Project.DoesNotExist:
+        #     # Modify the response to include success status (SAML successful, but user has no projects)
+        #     return Response({'success': True, 'user_data': None}, status=204)
+        # except Exception as e:
+        #     # Modify the response to indicate failure (SAML authentication failed)
+        #     return Response({'success': False, 'error_message': str(e)}, status=500)
 
 
 class UnZipView(viewsets.ViewSet):

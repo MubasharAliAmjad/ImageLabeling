@@ -6,7 +6,7 @@ class NoPasswordAuthBackend(ModelBackend):
         UserModel = get_user_model()
 
         try:
-            user = UserModel.objects.get(email=email)
+            user = UserModel._default_manager.get(email=email)
         except UserModel.DoesNotExist:
             return None
 
