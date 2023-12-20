@@ -63,9 +63,18 @@ class SAMLResponseView(APIView):
     def get(self, request):
         user = request.user
         email = request.user.email
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
-        return redirect('https://www.pixelpeek.xyz/sign-in?token=' + access_token)
+        try:
+            Project.objects.get(user = user)
+            all_projects = Project.objects.filter(user = user)
+            serializer = ProjectSerializer(all_projects, many=True)
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            redirect_url = f'http://localhost:3000/sign-in?token={access_token}&user_data={urlencode(serializer.data)}'
+        except:
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            return redirect('http://localhost:3000/sign-in?token=' + access_token)
+
 
         # return Response({'token': access_token})
         # return Response({'token': access_token, 'user_data': user_data})
@@ -162,7 +171,8 @@ class ProjectView(viewsets.ModelViewSet):
     permission_classes = [CustomPermission]
 
     # def get_serializer_context(self):
-    #     return {'user_id': self.request.user.id}
+    #     context['token'] = self.request.headers.get('Authorization')
+    #     return context
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
