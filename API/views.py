@@ -66,11 +66,13 @@ class SAMLResponseView(APIView):
         try:
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
-            redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={access_token}'
+            # redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={access_token}'
+            redirect_url = f'http://localhost:3000/sign-in?token={access_token}'
             return redirect(redirect_url)
         except:
             return redirect(redirect_url)
-            redirect_url = f'https://www.pixelpeek.xyz/sign-in'
+            # redirect_url = f'https://www.pixelpeek.xyz/sign-in'
+            redirect_url = f'http://localhost:3000/sign-in'
 
 
         # return Response({'token': access_token})
@@ -167,23 +169,48 @@ class ProjectView(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [CustomPermission]
 
-    def get_queryset(self):
-        token = self.request.headers.get("Authorization")
 
+    def list(self, request, *args, **kwargs):
+        # Decode the token and fetch user data
+        token = self.request.headers.get("Authorization")
         try:
             decoded_token = AccessToken(token)
             user_id = decoded_token['user_id']
         except Exception as e:
-            raise serializers.ValidationError({'error': 'Invalid token'})
+            return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = User.objects.get(id = user_id)
-        try:
-            all_projects = Project.objects.filter(user = user)
-            serializer = ProjectSerializer(all_projects, many=True)
-            # will sent user email later
-            return Response(serializer.data)
-        except Project.DoesNotExist:
-            return Response({'success': True, 'user_data': user.email, 'project_data': None}, status=204)
+        # Fetch user data
+        user = User.objects.get(id=user_id)
+        user_data = {'user_data': user.email}
+
+        # Fetch project data
+        projects = Project.objects.filter(user=user)
+        serializer = ProjectSerializer(projects, many=True)
+        project_data = serializer.data
+
+        # Construct the response data
+        data = {'user_data': user_data, 'project_data': project_data}
+
+        return Response(data, status=status.HTTP_200_OK)
+
+    # def get_queryset(self):
+    #     token = self.request.headers.get("Authorization")
+    #     try:
+    #         decoded_token = AccessToken(token)
+    #         user_id = decoded_token['user_id']
+    #     except Exception as e:
+    #         raise serializers.ValidationError({'error': 'Invalid token'})
+
+    #     user = User.objects.get(id = user_id)
+    #     try:
+    #         all_projects = Project.objects.filter(user = user)
+    #         serializer = ProjectSerializer(all_projects, many=True)
+    #         # will sent user email later
+    #         data = serializer.data
+    #         return Response(data)
+    #     except Project.DoesNotExist:
+    #         import pdb; pdb.set_trace()
+    #         return Response({'success': True, 'user_data': user.email, 'project_data': None}, status=204)
 
 
     def get_serializer_context(self):
