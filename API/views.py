@@ -62,13 +62,13 @@ class JsonLoginView(LoginView):
 @permission_classes([IsAuthenticated])
 class SAMLResponseView(APIView):
     def get(self, request):
+        user = request.user
         try:
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
             redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={access_token}'
         except:
             raise serializers.ValidationError({'error': 'Invalid token'})
-            #fhdfh
 
 
         # return Response({'token': access_token})
