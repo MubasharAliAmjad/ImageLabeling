@@ -190,6 +190,7 @@ class ProjectView(viewsets.ModelViewSet):
         except Project.DoesNotExist:
             return Response({'success': True, 'user_data': user.email, 'project_data': None}, status=204)
 
+
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['token'] = self.request.headers.get('Authorization')

@@ -107,6 +107,7 @@ class Session(models.Model):
     slice = models.ManyToManyField(Slice, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add = True)
 
+
     def __str__(self):
         return f"sesion {self.id}"
 

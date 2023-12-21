@@ -23,4 +23,5 @@ urlpatterns = [
     path('export_data/<int:id>/', views.ExportDataview.as_view()),
     path('saml2/login/', views.JsonLoginView.as_view(), name="login"),
     path('saml2/', include('djangosaml2.urls'), name="saml2_login"),
+    
 ]

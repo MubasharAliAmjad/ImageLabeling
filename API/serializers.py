@@ -692,6 +692,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             # project = Project.objects.create(project_name = project_name, question = validated_data.get("question"))
             project.session.set(session_list)
 
+
         
         except IndexError as e:
             return serializers.ValidationError("Index out of range")
