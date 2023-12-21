@@ -65,16 +65,15 @@ class SAMLResponseView(APIView):
         user = request.user
         email = request.user.email
         try:
-            Project.objects.get(user = user)
             all_projects = Project.objects.filter(user = user)
             serializer = ProjectSerializer(all_projects, many=True)
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
-            redirect_url = f'http://localhost:3000/sign-in?token={access_token}&user_data={urlencode(serializer.data)}'
+            redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={access_token}&user_data={urlencode(serializer.data)}'
         except:
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
-            return redirect('http://localhost:3000/sign-in?token=' + access_token)
+            return redirect('https://www.pixelpeek.xyz/sign-in?token=' + access_token)
             #fhdfh
 
 
