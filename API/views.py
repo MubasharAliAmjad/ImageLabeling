@@ -66,13 +66,13 @@ class SAMLResponseView(APIView):
         try:
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
-            # redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={access_token}'
-            redirect_url = f'http://localhost:3000/sign-in?token={access_token}'
+            redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={access_token}'
+            # redirect_url = f'http://localhost:3000/sign-in?token={access_token}'
             return redirect(redirect_url)
         except:
             return redirect(redirect_url)
-            # redirect_url = f'https://www.pixelpeek.xyz/sign-in'
-            redirect_url = f'http://localhost:3000/sign-in'
+            redirect_url = f'https://www.pixelpeek.xyz/sign-in'
+            # redirect_url = f'http://localhost:3000/sign-in'
 
 
         # return Response({'token': access_token})
