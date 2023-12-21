@@ -67,8 +67,10 @@ class SAMLResponseView(APIView):
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
             redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={access_token}'
+            return redirect(redirect_url)
         except:
-            raise serializers.ValidationError({'error': 'Invalid token'})
+            return redirect(redirect_url)
+            redirect_url = f'https://www.pixelpeek.xyz/sign-in'
 
 
         # return Response({'token': access_token})
