@@ -23,6 +23,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework_simplejwt.tokens import AccessToken
 # Create your views here.
 
 class JsonLoginView(LoginView):
@@ -54,7 +55,6 @@ class JsonLoginView(LoginView):
 
 class LoginSAMLView(APIView):
     def get(self, request):
-        # import pdb; pdb.set_trace()
         return redirect("https://fb7a-119-155-5-216.ngrok-free.app/saml2/login")
 
 @authentication_classes([SessionAuthentication, BasicAuthentication])
@@ -171,9 +171,29 @@ class ProjectView(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [CustomPermission]
 
-    # def get_serializer_context(self):
-    #     context['token'] = self.request.headers.get('Authorization')
-    #     return context
+    def get_queryset(self):
+        token = self.request.headers.get("Authorization")
+
+        try:
+            decoded_token = AccessToken(token)
+            user_id = decoded_token['user_id']
+        except Exception as e:
+            raise serializers.ValidationError({'error': 'Invalid token'})
+
+        user = User.objects.get(id = user_id)
+        try:
+            all_projects = Project.objects.filter(user = user)
+            serializer = ProjectSerializer(all_projects, many=True)
+            # will sent user email later
+            return Response(serializer.data)
+        except Project.DoesNotExist:
+            return Response({'success': True, 'user_data': user.email, 'project_data': None}, status=204)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['token'] = self.request.headers.get('Authorization')
+        return context
+        
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

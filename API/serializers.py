@@ -572,12 +572,12 @@ class ProjectSerializer(serializers.ModelSerializer):
     
 
     def create(self, validated_data):
-        # token = self.context.get('token')
-        # try:
-        #     decoded_token = AccessToken(token)
-        #     user_id = decoded_token['user_id']
-        # except Exception as e:
-        #     raise serializers.ValidationError({'error': 'Invalid token'})
+        token = self.context.get('token')
+        try:
+            decoded_token = AccessToken(token)
+            user_id = decoded_token['user_id']
+        except Exception as e:
+            raise serializers.ValidationError({'error': 'Invalid token'})
         
         try:
             project_name = validated_data.get("project_name")
@@ -687,9 +687,9 @@ class ProjectSerializer(serializers.ModelSerializer):
             session.case.add(*case_list)
             session_list.append(session)
             
-            # user = User.objects.get(id = user_id)
-            # project = Project.objects.create(user = user, project_name = project_name, question = validated_data.get("question"))
-            project = Project.objects.create(project_name = project_name, question = validated_data.get("question"))
+            user = User.objects.get(id = user_id)
+            project = Project.objects.create(user = user, project_name = project_name, question = validated_data.get("question"))
+            # project = Project.objects.create(project_name = project_name, question = validated_data.get("question"))
             project.session.set(session_list)
 
         

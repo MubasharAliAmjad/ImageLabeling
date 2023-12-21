@@ -111,7 +111,7 @@ class Session(models.Model):
         return f"sesion {self.id}"
 
 class Project(models.Model):
-    # user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     project_name = models.CharField(max_length=255)
     question = models.CharField(max_length=255)
     session = models.ManyToManyField(Session, blank=True)
