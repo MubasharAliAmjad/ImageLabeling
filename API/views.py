@@ -56,6 +56,7 @@ class JsonLoginView(LoginView):
 # class LoginSAMLView(APIView):
 #     def get(self, request):
 #         return redirect("https://fb7a-119-155-5-216.ngrok-free.app/saml2/login")
+# work
 
 @authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
