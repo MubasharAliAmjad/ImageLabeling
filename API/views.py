@@ -252,6 +252,7 @@ class SessionCreateView(CreateAPIView):
     serializer_class = SessionCreateSerializer
     queryset = Session.objects.all()
     permission_classes = [CustomPermission]
+    
 
 class SessionUpdateView(RetrieveUpdateAPIView):
     serializer_class = SessionUpdateSerializer
@@ -286,13 +287,13 @@ class ExportDataview(APIView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{title}"'
         csv_data = []
-        csv_data.append(['Project Name', 'Session Name', 'Case Name', 'TimeStamp', 'Category_Type', 'Image Id', 'Score', 'Labels', 'Options'])
-        # csv_data.append(['User', 'Project Name', 'Session Name', 'Case Name', 'TimeStamp', 'Category_Type', 'Image Id', 'Score', 'Labels', 'Options'])
+        # csv_data.append(['Project Name', 'Session Name', 'Case Name', 'TimeStamp', 'Category_Type', 'Image Id', 'Score', 'Labels', 'Options'])
+        csv_data.append(['User', 'Project Name', 'Session Name', 'Case Name', 'TimeStamp', 'Category_Type', 'Image Id', 'Score', 'Labels', 'Options'])
         row = []
 
         for slice in slice_all:
-            row = [slice.project_name, slice.session_name, slice.case_name, date_time, slice.category_type_name, slice.image_id, slice.score, slice.labels, slice.options]
-            # row = [slice.email, slice.project_name, slice.session_name, slice.case_name, date_time, slice.category_type_name, slice.image_id, slice.score, slice.labels, slice.options]
+            # row = [slice.project_name, slice.session_name, slice.case_name, date_time, slice.category_type_name, slice.image_id, slice.score, slice.labels, slice.options]
+            row = [slice.email, slice.project_name, slice.session_name, slice.case_name, date_time, slice.category_type_name, slice.image_id, slice.score, slice.labels, slice.options]
             csv_data.append(row)
 
         csv_text = "\n".join([",".join(['"{}"'.format(value) for value in row]) for row in csv_data])
