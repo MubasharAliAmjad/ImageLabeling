@@ -103,6 +103,14 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CROSS_ORIGIN_ALLOW_ALL = True
 
+CORS_ALLOW_HEADERS = (
+    # 'Encryption-IV',
+    # 'Encryption-Key',
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+)
+
 CSRF_COOKIE_SECURE = False
 # CORS_ALLOW_HEADERS = (
 #     # 'Encryption-IV',
