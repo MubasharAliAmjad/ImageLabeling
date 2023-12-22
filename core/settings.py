@@ -125,7 +125,7 @@ CSRF_COOKIE_SECURE = False
 #     'X-Requested-With',
 # )
 CSRF_TRUSTED_ORIGINS = ['https://fb7a-119-155-5-216.ngrok-free.app']
-
+CORS_ALLOW_ALL_HEADERS = True
 
 CORS_ALLOW_METHODS = [
     'GET',
@@ -135,10 +135,7 @@ CORS_ALLOW_METHODS = [
     'DELETE',
 ]
 # CORS_ALLOW_CREDENTIALS = True
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-    
-# ]
+
 # "https://c840-45-117-104-111.ngrok-free.app"
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
