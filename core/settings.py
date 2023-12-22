@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'API',
     'rest_framework',
     'drf_yasg',
-    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -49,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djangosaml2',
+    'corsheaders,
 ]
 
 MIDDLEWARE = [    
@@ -100,22 +100,10 @@ DATABASES = {
 
 
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "https://fb7a-119-155-5-216.ngrok-free.app",
-    'https://www.pixelpeek.xyz',
-    'http://127.0.0.1:8000'
-]
-CORS_ALLOW_CREDENTIALS=True
+CORS_ALLOW_CREDENTIALS = True
+
 CROSS_ORIGIN_ALLOW_ALL = True
-# CORS_ALLOW_ALL_ORIGINS = True
-CORS_ORIGIN_WHITELIST = (
-    "http://localhost:3000",
-    'http://127.0.0.1:8000',
-    "http://104.154.218.42",
-    "https://www.pixelpeek.xyz",
-    "https://fb7a-119-155-5-216.ngrok-free.app"
-)
+
 CSRF_COOKIE_SECURE = False
 # CORS_ALLOW_HEADERS = (
 #     # 'Encryption-IV',
@@ -124,16 +112,7 @@ CSRF_COOKIE_SECURE = False
 #     'Authorization',
 #     'X-Requested-With',
 # )
-CSRF_TRUSTED_ORIGINS = ['https://fb7a-119-155-5-216.ngrok-free.app']
-CORS_ALLOW_ALL_HEADERS = True
 
-CORS_ALLOW_METHODS = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-]
 # CORS_ALLOW_CREDENTIALS = True
 
 # "https://c840-45-117-104-111.ngrok-free.app"
