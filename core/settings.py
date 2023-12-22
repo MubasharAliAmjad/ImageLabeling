@@ -32,7 +32,7 @@ SECRET_KEY = 'django-insecure-$szngl!cfu^8b1qt7x4^ei9qq@0x0-t$nktk*k37#j369er$%#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ["*", "https://backend.pixelpeek.xyz/"]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', "e2be-119-155-5-216.ngrok-free.app"]
 
 
 # Application definition
@@ -98,20 +98,48 @@ DATABASES = {
     'default': dj_database_url.parse(config('DATABASE_URL'), conn_max_age=600, conn_health_checks=True)
 }
 
-
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True # If this is used then `CORS_ALLOWED_ORIGINS` will not have any effect
 CORS_ALLOW_CREDENTIALS = True
-CROSS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'https://www.pixelpeek.xyz'
+] 
+# If this is used, then not need to use `CORS_ALLOW_ALL_ORIGINS = True`
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    'http://localhost:3000',
+    'https://www.pixelpeek.xyz'
+]
 
-CORS_ALLOW_HEADERS = (
-    # 'Encryption-IV',
-    # 'Encryption-Key',
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost:3000',
+    'https://www.pixelpeek.xyz'
+)
+
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://www.pixelpeek.xyz']
+    
+
+CORS_ALLOW_HEADERS = [
     'Content-Type',
     'Authorization',
     'X-Requested-With',
-)
+]
 
-CSRF_COOKIE_SECURE = False
+# CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_CREDENTIALS = True
+# CROSS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOW_CREDENTIALS=False
+
+
+# CORS_ALLOW_HEADERS = (
+#     # 'Encryption-IV',
+#     # 'Encryption-Key',
+#     'Content-Type',
+#     'Authorization',
+#     'X-Requested-With',
+# )
+
+# CSRF_COOKIE_SECURE = False
 # CORS_ALLOW_HEADERS = (
 #     # 'Encryption-IV',
 #     # 'Encryption-Key',
