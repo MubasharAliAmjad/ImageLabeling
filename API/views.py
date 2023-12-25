@@ -76,13 +76,13 @@ class SAMLResponseView(APIView):
         try:
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
-            # redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={access_token}'
-            redirect_url = f'http://localhost:3000/sign-in?token={access_token}'
+            redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={access_token}'
+            # redirect_url = f'http://localhost:3000/sign-in?token={access_token}'
             return redirect(redirect_url)
         except:
             return redirect(redirect_url)
-            # redirect_url = f'https://www.pixelpeek.xyz/sign-in'
-            redirect_url = f'http://localhost:3000/sign-in'
+            redirect_url = f'https://www.pixelpeek.xyz/sign-in'
+            # redirect_url = f'http://localhost:3000/sign-in'
 
 
         # return Response({'token': access_token})
@@ -191,7 +191,7 @@ class ProjectView(viewsets.ModelViewSet):
 
         # Fetch user data
         user = User.objects.get(id=user_id)
-        user_data = {'user_data': user.email}
+        user_data = {'user_data': user.email, 'username': user.email.split('@')[0]}
 
         # Fetch project data
         projects = Project.objects.filter(user=user)

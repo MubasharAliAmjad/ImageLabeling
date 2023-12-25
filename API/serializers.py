@@ -603,8 +603,29 @@ class ProjectSerializer(serializers.ModelSerializer):
             if randomize_cases:
                 random.shuffle(list_cases_in_zip)
             if randomize_categories:
-                random.shuffle(rows_list)
-                random.shuffle(columns_list)
+                unzip_serializer = UnzipSerializer()
+                category_type_folder_list = unzip_serializer.find_category_type_folders(subfolders_path)
+                category_list = []
+                for category_type in category_type_folder_list:
+                    if not '_' in category_type:
+                        continue
+                    category, type = category_type.split('_')
+                    if category in rows_list or category in columns_list:
+                        if not category in category_list:
+                            category_list.append(category)
+                # Extract the category elements from both lists
+                category_elements_rows = [category for category in rows_list if category in category_list]
+                category_elements_columns = [category for category in columns_list if category in category_list]
+                
+                # Shuffle the category elements
+                random.shuffle(category_elements_rows)
+                random.shuffle(category_elements_columns)
+                # Replace the shuffled category elements in the original lists
+                
+                rows_list = [category if category not in category_list else category_elements_rows.pop(0) for category in rows_list]
+                columns_list = [category if category not in category_list else category_elements_columns.pop(0) for category in columns_list]
+                # random.shuffle(rows_list)
+                # random.shuffle(columns_list)
 
             
             cols_number = case_data_item[0].get('cols_number')
@@ -656,7 +677,6 @@ class ProjectSerializer(serializers.ModelSerializer):
                 
                 category_type_list = []
                 for row_data in rows_list:
-                    
                     for column_data in  columns_list:
                         if f"{row_data}_{column_data}" in list_folders_in_zip:
                             file_folder = f"{row_data}_{column_data}"

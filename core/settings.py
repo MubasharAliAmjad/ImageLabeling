@@ -224,6 +224,7 @@ SAML_CONFIG = {
 
           # For Okta add signed logout requests. Enable this:
           "logout_requests_signed": True,
+          'name_id_format_allow_create': True,
 
           'endpoints': {
               # url and binding to the assetion consumer service view
