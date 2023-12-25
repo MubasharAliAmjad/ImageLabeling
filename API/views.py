@@ -53,10 +53,20 @@ class JsonLoginView(LoginView):
 
         return JsonResponse(json_data)
 
-# class LoginSAMLView(APIView):
-#     def get(self, request):
-#         return redirect("https://fb7a-119-155-5-216.ngrok-free.app/saml2/login")
-# work
+class LogoutView(APIView):
+    def post(self, request, *args, **kwargs):
+        token = self.request.headers.get("Authorization")
+        if not token:
+            return Response({'error': 'Refresh token not provided'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            RefreshToken(token).blacklist()
+
+            # You may want to perform additional actions, such as logging out the user from the frontend
+
+            return Response({'success': 'Logout successful'})
+        except Exception as e:
+            return Response({'error': 'Invalid refresh token'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
@@ -66,13 +76,13 @@ class SAMLResponseView(APIView):
         try:
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
-            redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={access_token}'
-            # redirect_url = f'http://localhost:3000/sign-in?token={access_token}'
+            # redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={access_token}'
+            redirect_url = f'http://localhost:3000/sign-in?token={access_token}'
             return redirect(redirect_url)
         except:
             return redirect(redirect_url)
-            redirect_url = f'https://www.pixelpeek.xyz/sign-in'
-            # redirect_url = f'http://localhost:3000/sign-in'
+            # redirect_url = f'https://www.pixelpeek.xyz/sign-in'
+            redirect_url = f'http://localhost:3000/sign-in'
 
 
         # return Response({'token': access_token})
