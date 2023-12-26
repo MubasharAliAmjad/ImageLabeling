@@ -56,15 +56,27 @@ class JsonLoginView(LoginView):
 class LogoutView(APIView):
     def post(self, request, *args, **kwargs):
         token = self.request.headers.get("Authorization")
+        token = RefreshToken(token)
+        # token.blacklist()
+        # decoded_token = AccessToken(token)
+        # user_id = decoded_token['user_id']
+        # user = User.objects.get(id = user_id)
+        # refresh_token = RefreshToken.for_user(user)
+        # print(refresh_token.access_token)
+        
+        # refresh_token = RefreshToken(token)
+
+        # token = RefreshToken(token)
         if not token:
             return Response({'error': 'Refresh token not provided'}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            RefreshToken(token).blacklist()
+            token.blacklist()
 
             # You may want to perform additional actions, such as logging out the user from the frontend
 
             return Response({'success': 'Logout successful'})
         except Exception as e:
+            print(e)
             return Response({'error': 'Invalid refresh token'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -74,15 +86,16 @@ class SAMLResponseView(APIView):
     def get(self, request):
         user = request.user
         try:
+            
             refresh = RefreshToken.for_user(user)
-            access_token = str(refresh.access_token)
+            # access_token = str(refresh.access_token)
             redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={access_token}'
-            # redirect_url = f'http://localhost:3000/sign-in?token={access_token}'
+            # redirect_url = f'http://localhost:3000/sign-in?token={refresh}'
             return redirect(redirect_url)
         except:
-            return redirect(redirect_url)
             redirect_url = f'https://www.pixelpeek.xyz/sign-in'
             # redirect_url = f'http://localhost:3000/sign-in'
+            return redirect(redirect_url)
 
 
         # return Response({'token': access_token})
@@ -182,10 +195,11 @@ class ProjectView(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         # Decode the token and fetch user data
+        
         token = self.request.headers.get("Authorization")
         try:
-            decoded_token = AccessToken(token)
-            user_id = decoded_token['user_id']
+            token = RefreshToken(token)
+            user_id = token['user_id']
         except Exception as e:
             return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -219,11 +233,12 @@ class ProjectView(viewsets.ModelViewSet):
     #         data = serializer.data
     #         return Response(data)
     #     except Project.DoesNotExist:
-    #         import pdb; pdb.set_trace()
+    #         
     #         return Response({'success': True, 'user_data': user.email, 'project_data': None}, status=204)
 
 
     def get_serializer_context(self):
+        
         context = super().get_serializer_context()
         context['token'] = self.request.headers.get('Authorization')
         return context

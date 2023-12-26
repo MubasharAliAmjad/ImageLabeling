@@ -12,6 +12,7 @@ from shutil import copyfile
 from django.core.files import File
 from django.core.files.base import ContentFile
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -574,16 +575,16 @@ class ProjectSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         token = self.context.get('token')
         try:
-            decoded_token = AccessToken(token)
-            user_id = decoded_token['user_id']
+            token = RefreshToken(token)
+            user_id = token['user_id']
         except Exception as e:
             raise serializers.ValidationError({'error': 'Invalid token'})
         
         try:
             project_name = validated_data.get("project_name")
             zip_folder = validated_data.pop('zip_folder')
-            rows_list = validated_data.pop('rows_list')
-            columns_list = validated_data.pop('columns_list') 
+            columns_list = validated_data.pop('rows_list')
+            rows_list= validated_data.pop('columns_list') 
             case_data_item = validated_data.pop("case")
         except KeyError as e:
             field_name = e.args[0] if e.args else 'unknown'
@@ -605,25 +606,33 @@ class ProjectSerializer(serializers.ModelSerializer):
             if randomize_categories:
                 unzip_serializer = UnzipSerializer()
                 category_type_folder_list = unzip_serializer.find_category_type_folders(subfolders_path)
-                category_list = []
+                category_row_list = []
+                category_column_list = []
                 for category_type in category_type_folder_list:
                     if not '_' in category_type:
                         continue
                     category, type = category_type.split('_')
-                    if category in rows_list or category in columns_list:
-                        if not category in category_list:
-                            category_list.append(category)
+                    if category in rows_list:
+                            category_row_list.append(category)
+                    if category in columns_list:
+                        category_column_list.append(category)
+
+                category_row_list = set(category_row_list)
+                category_column_list = set(category_column_list)
                 # Extract the category elements from both lists
-                category_elements_rows = [category for category in rows_list if category in category_list]
-                category_elements_columns = [category for category in columns_list if category in category_list]
-                
-                # Shuffle the category elements
-                random.shuffle(category_elements_rows)
-                random.shuffle(category_elements_columns)
+                category_elements_rows = [category for category in rows_list if category in category_row_list]
+                category_elements_columns = [category for category in columns_list if category in category_column_list]
+
+                # Shuffle the category elements (using a copy to avoid modifying the original lists)
+                shuffled_category_elements_rows = category_elements_rows.copy()
+                shuffled_category_elements_columns = category_elements_columns.copy()
+
+                random.shuffle(shuffled_category_elements_rows)
+                random.shuffle(shuffled_category_elements_columns)
+
                 # Replace the shuffled category elements in the original lists
-                
-                rows_list = [category if category not in category_list else category_elements_rows.pop(0) for category in rows_list]
-                columns_list = [category if category not in category_list else category_elements_columns.pop(0) for category in columns_list]
+                rows_list = [category if category not in category_row_list else shuffled_category_elements_rows.pop(0) for category in rows_list]
+                columns_list = [category if category not in category_column_list else shuffled_category_elements_columns.pop(0) for category in columns_list]
                 # random.shuffle(rows_list)
                 # random.shuffle(columns_list)
 
@@ -702,7 +711,7 @@ class ProjectSerializer(serializers.ModelSerializer):
                 case_obj.category_type.set(category_type_list)
                 case_obj.save()
                 case_list.append(case_obj)
-            
+            random.shuffle(case_list)
             session = Session.objects.create(session_name = project_name, notes = notes)
             session.case.add(*case_list)
             session_list.append(session)
