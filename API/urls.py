@@ -6,7 +6,6 @@ from .swagger_config import schema_view
 router = DefaultRouter()
 
 router.register(r'project', views.ProjectView, basename='project')
-# router.register(r'session', views.SessionCreateView, basename='session')
 router.register(r'unzip', views.UnZipView, basename='unzip')
 
 urlpatterns = [
@@ -19,7 +18,6 @@ urlpatterns = [
     path('read_local/', views.ReadFromLocalView.as_view(), name="read_local"),
     path('logout/', views.LogoutView.as_view(), name="logout"),
     path('saml_response/', views.SAMLResponseView.as_view(), name="saml_response"),
-    # path('slice/', views.CustomSliceView.as_view()),
     path('export_data/<int:id>/', views.ExportDataview.as_view()),
     path('saml2/login/', views.JsonLoginView.as_view(), name="login"),
     path('saml2/', include('djangosaml2.urls'), name="saml2_login"),

@@ -24,18 +24,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework_simplejwt.tokens import AccessToken
-# Create your views here.
 
+# Create your views here.
 class JsonLoginView(LoginView):
     def get(self, request, *args, **kwargs):
-        # Call the parent get method to perform the SAML login
         response = super().get(request, *args, **kwargs)
 
-        # Extract data from the HTML response
         html_content = response.content.decode('utf-8')
 
-        # Extract relevant information from the HTML (customize as needed)
-        # For demonstration purposes, extracting the action URL and SAMLRequest
         action_url_start = html_content.find('action="') + len('action="')
         action_url_end = html_content.find('"', action_url_start)
         action_url = html_content[action_url_start:action_url_end]
@@ -48,7 +44,7 @@ class JsonLoginView(LoginView):
         json_data = {
             'action_url': action_url,
             'saml_request': saml_request,
-            'relay_state': '/api/saml_response/',  # customize as needed
+            'relay_state': '/api/saml_response/',
         }
 
         return JsonResponse(json_data)
@@ -58,26 +54,12 @@ class LogoutView(APIView):
 
         token = self.request.headers.get("Authorization")
         token = RefreshToken(token)
-        # token.blacklist()
-        # decoded_token = AccessToken(token)
-        # user_id = decoded_token['user_id']
-        # user = User.objects.get(id = user_id)
-        # refresh_token = RefreshToken.for_user(user)
-        # print(refresh_token.access_token)
-        
-        # refresh_token = RefreshToken(token)
-
-        # token = RefreshToken(token)
         if not token:
             return Response({'error': 'Refresh token not provided'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             token.blacklist()
-
-            # You may want to perform additional actions, such as logging out the user from the frontend
-
             return Response({'success': 'Logout successful'})
         except Exception as e:
-            print(e)
             return Response({'error': 'Invalid refresh token'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -89,43 +71,13 @@ class SAMLResponseView(APIView):
         try:
             
             refresh = RefreshToken.for_user(user)
-            # access_token = str(refresh.access_token)
-            # print("refresh", refresh)
-            redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={refresh}'
-            # redirect_url = f'http://localhost:3000/sign-in?token={refresh}'
+            # redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={refresh}'
+            redirect_url = f'http://localhost:3000/sign-in?token={refresh}'
             return redirect(redirect_url)
         except Exception as e:
-            # print("exception:", e)
-            # redirect_url = f'https://www.pixelpeek.xyz/sign-in'
-            # redirect_url = f'http://localhost:3000/sign-in'
-            redirect_url = f'https://www.pixelpeek.xyz/sign-in?error={e}'
+            redirect_url = f'http://localhost:3000/sign-in?error={e}'
+            # redirect_url = f'https://www.pixelpeek.xyz/sign-in?error={e}'
             return redirect(redirect_url)
-
-
-        # return Response({'token': access_token})
-        # return Response({'token': access_token, 'user_data': user_data})
-        # try:
-        #     # existing_user = User.objects.get(email = email)
-        #     # all_projects = Project.objects.filter(user = existing_user)
-        #     # serializer = ProjectSerializer(all_projects, many=True)
-        #     response_data = {
-        #         'success': True,
-        #         # 'user_data': {
-        #         #     # 'username': user.username,
-        #         #     'email': email,
-        #         #     # 'projects': serializer.data,
-        #         #     # Add other user-related data as needed
-        #         # }
-        #     }
-
-        #     return Response(response_data, status=200)
-        # except Project.DoesNotExist:
-        #     # Modify the response to include success status (SAML successful, but user has no projects)
-        #     return Response({'success': True, 'user_data': None}, status=204)
-        # except Exception as e:
-        #     # Modify the response to indicate failure (SAML authentication failed)
-        #     return Response({'success': False, 'error_message': str(e)}, status=500)
-
 
 class UnZipView(viewsets.ViewSet):
     serializer_class = UnzipSerializer
@@ -168,7 +120,6 @@ class ReadFromLocalView(APIView):
                 if os.path.isdir(os.path.join(extract_dir, subfolder)):
                     subfolders_path = os.path.join(extract_dir, subfolder)
 
-            # code reused from Serializer Class
             project_serializer = ProjectSerializer()
             category_type_folder_list  = project_serializer.find_list_folders(subfolders_path)
 
@@ -219,25 +170,6 @@ class ProjectView(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    # def get_queryset(self):
-    #     token = self.request.headers.get("Authorization")
-    #     try:
-    #         decoded_token = AccessToken(token)
-    #         user_id = decoded_token['user_id']
-    #     except Exception as e:
-    #         raise serializers.ValidationError({'error': 'Invalid token'})
-
-    #     user = User.objects.get(id = user_id)
-    #     try:
-    #         all_projects = Project.objects.filter(user = user)
-    #         serializer = ProjectSerializer(all_projects, many=True)
-    #         # will sent user email later
-    #         data = serializer.data
-    #         return Response(data)
-    #     except Project.DoesNotExist:
-    #         
-    #         return Response({'success': True, 'user_data': user.email, 'project_data': None}, status=204)
-
 
     def get_serializer_context(self):
         
@@ -273,8 +205,6 @@ class SessionDestroyView(DestroyAPIView):
         return Response({'message': 'Object deleted successfully'}, status=status.HTTP_200_OK)
 
 
-
-
 class SessionCreateView(CreateAPIView):
     serializer_class = SessionCreateSerializer
     queryset = Session.objects.all()
@@ -285,19 +215,7 @@ class SessionUpdateView(RetrieveUpdateAPIView):
     serializer_class = SessionUpdateSerializer
     queryset = Session.objects.all()
     
-    # def get(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     session_serializer = SessionUpdateSerializer(instance)
-    #     serialized_session = session_serializer.data
-    #     session_projects = instance.project_set.all()
-    #     question = session_projects[0].question
-    #     context = {
-    #         "session": serialized_session,
-    #         "question": question
-    #     }
-    #     return Response(context)
 
-    
 class ExportDataview(APIView):
     def get(self, request, id):
         session = Session.objects.get(id = id)
@@ -306,7 +224,6 @@ class ExportDataview(APIView):
         
         project_name = projects_related_to_session[0].project_name
         
-        # date_time = session.created_at.strftime("%d:%m:%Y %I:%M %p")
         date_time = session.created_at.strftime("%d:%m:%Y %I:%M:%S %p")
 
         
@@ -314,13 +231,11 @@ class ExportDataview(APIView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{title}"'
         csv_data = []
-        # csv_data.append(['Project Name', 'Session Name', 'Case Name', 'TimeStamp', 'Category_Type', 'Image Id', 'Score', 'Labels', 'Options'])
         csv_data.append(['User', 'Project Name', 'Session Name', 'Case Name', 'TimeStamp', 'Category_Type', 'Image Id', 'Score', 'Labels', 'Options'])
         row = []
 
         for slice in slice_all:
             date_time = slice.created_at.strftime("%d:%m:%Y %I:%M:%S %p")
-            # row = [slice.project_name, slice.session_name, slice.case_name, date_time, slice.category_type_name, slice.image_id, slice.score, slice.labels, slice.options]
             row = [slice.email, slice.project_name, slice.session_name, slice.case_name, date_time, slice.category_type_name, slice.image_id, slice.score, slice.labels, slice.options]
             csv_data.append(row)
 

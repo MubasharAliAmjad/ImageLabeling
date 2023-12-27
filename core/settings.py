@@ -106,15 +106,6 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://www.pixelpeek.xyz', 'https://backend.pixelpeek.xyz']
 
-# CORS_ALLOW_ALL_ORIGINS = True
-# CORS_ALLOW_CREDENTIALS = True
-# CROSS_ORIGIN_ALLOW_ALL = True
-# CORS_ORIGIN_ALLOW_ALL = True
-# CORS_ALLOW_CREDENTIALS=False
-
-# CSRF_COOKIE_SECURE = False
-
-# CORS_ALLOW_CREDENTIALS = True
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -197,7 +188,6 @@ SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
 SAML_CREATE_UNKNOWN_USER = True 
 ACS_DEFAULT_REDIRECT_URL = reverse_lazy('saml_response')
 SAML_ATTRIBUTE_MAPPING = {
-    # 'uid': ('username', ),
     'email': ('email', ),
 }
 SAML_CONFIG = {
@@ -210,18 +200,6 @@ SAML_CONFIG = {
     'email': ('uid',),
    },
 
-  # directory with attribute mapping
-#   'attribute_map_dir': path.join(BASE_DIR, 'attrmap'),
-#   'attribute_converters': {
-#         # Example for converting the 'email' attribute
-#         'email': {
-#             'class': 'djangosaml2.map_attribute.EmailAttribute',
-#             'attribute': 'email',  # Replace with the actual attribute name in the SAML assertion
-#         },
-#   },
-
-  # Permits to have attributes not configured in attribute-mappings
-  # otherwise...without OID will be rejected
   'allow_unknown_attributes': True,
 
   # this block states what services we provide
@@ -236,17 +214,13 @@ SAML_CONFIG = {
           'name_id_format_allow_create': True,
 
           'endpoints': {
-              # url and binding to the assetion consumer service view
-              # do not change the binding or service name
               'assertion_consumer_service': [
                   ('https://backend.pixelpeek.xyz/api/saml2/acs/',
                    saml2.BINDING_HTTP_POST),
                   ],
-                  # comment
               # url and binding to the single logout service view
               # do not change the binding or service name
               'single_logout_service': [
-                  # Disable next two lines for HTTP_REDIRECT for IDP's that only support HTTP_POST. Ex. Okta:
                   ('https://backend.pixelpeek.xyz/api/saml2/ls/',
                    saml2.BINDING_HTTP_REDIRECT),
                   ('https://backend.pixelpeek.xyz/api/saml2/ls/post',
@@ -262,21 +236,15 @@ SAML_CONFIG = {
            # presenter directly rather than rely on a previous security context.
           'force_authn': True,
 
-           # Enable AllowCreate in NameIDPolicy.
           'name_id_format_allow_create': False,
 
            # attributes that this project need to identify a user
           'required_attributes': ['email'],
 
-           # attributes that may be useful to have but not required
-        #   'optional_attributes': ['eduPersonAffiliation'],
-
           'want_response_signed': True,
           'authn_requests_signed': True,
           'logout_requests_signed': True,
-          # Indicates that Authentication Responses to this SP must
-          # be signed. If set to True, the SP will not consume
-          # any SAML Responses that are not signed.
+          
           'want_assertions_signed': False,
 
           'only_use_keys_in_metadata': True,
@@ -289,11 +257,7 @@ SAML_CONFIG = {
           # in this section the list of IdPs we talk to are defined
           # This is not mandatory! All the IdP available in the metadata will be considered instead.
           'idp': {
-              # we do not need a WAYF service since there is
-              # only an IdP defined here. This IdP should be
-              # present in our metadata
-
-              # the keys of this dictionary are entity ids
+              
               'https://accounts.google.com/o/saml2?idpid=C02c2knks': {
                   'single_sign_on_service': {
                       saml2.BINDING_HTTP_REDIRECT: 'https://accounts.google.com/o/saml2/idp?idpid=C02c2knks',
@@ -311,19 +275,13 @@ SAML_CONFIG = {
   'metadata': {
       'local': [path.join(BASE_DIR, 'GoogleIDPMetadata.xml')]
       },
-# "cert": "MIIDdDCCAlygAwIBAgIGAYwteMrDMA0GCSqGSIb3DQEBCwUAMHsxFDASBgNVBAoTC0dvb2dsZSBJbmMuMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MQ8wDQYDVQQDEwZHb29nbGUxGDAWBgNVBAsTD0dvb2dsZSBGb3IgV29yazELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWEwHhcNMjMxMjAzMDIxODU5WhcNMjgxMjAxMDIxODU5WjB7MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEPMA0GA1UEAxMGR29vZ2xlMRgwFgYDVQQLEw9Hb29nbGUgRm9yIFdvcmsxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0GZg0yqZSreU9F0cZNw8905SsvjwTGZLyYZRNv96MMe+8S0N32Y1GrTtsbJnnW6x1iET4J1Yth6a4SoGXnFfnXjX7WHeqK89GO0uJtn8Ve1V2HD9nOTK82tldzYzswCS6fSqrSkcmGVvtC/KZVQVW4IHEVtN3OIIjLlYJ01X1PPgchjnfgnGWQFZcxTDYUzJ89fEvCbT1IA5XHgdA042sVeMWRmDvGeB7WgegPXePSd49qPiq/j0he7nVJeIyW9yagoU5KB9Nl6TGBtNO+KbGmuor9hAXepMHaKXBgMclJ5n5Jcz90fwfCPaz5bc8ftPjwi1F0+R7YQD1ZqXTfhzeQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQA1qSW+GF4IcQiIdc1LEj3GYG4ZUkHMtolisD4XyHFkkjSedz/EiJFFIqM55XS9uzvRw3SctIEo15/D0q2Cp5IbM6kUY5BfgWAtUrtufE3gzs8GhzHm/floFhm43GjV7hR/xsnZB0UEOFhMlS1hPZ4oYB4p5GqbC5UjhAUI0TfQzvAZO1UNnUsVRRXzOE7q3syK6V11iXxfhX51YpIaBdQrims5OM6eyRA8nsipGLspxq2scPM5PJGKmED41nBaJDEu6Orfv6ES3US2fO05wCxrbzaGvRxp3WoGHQ0jjQmtEzfD/vnDJ2gW71um4xXKiXLAYle3SyWLyYkKIfBnAhux",
-  # set to 1 to output debugging information
+
   'debug': 1,
 
   # Signing
   'key_file': path.join(BASE_DIR, 'private.key'),  # private part
   'cert_file': path.join(BASE_DIR, 'public.cert'),  # public part
 
-#   # Encryption
-#   'encryption_keypairs': [{
-#       'key_file': path.join(BASEDIR, 'private.key'),  # private part
-#       'cert_file': path.join(BASEDIR, 'public.pem'),  # public part
-#   }],
 
   # own metadata settings
   'contact_person': [
@@ -333,13 +291,8 @@ SAML_CONFIG = {
        'email_address': 'MubasharAliAmjad@gmail.com',
        'contact_type': 'technical'},
       ],
-  # you can set multilanguage information here
-#   'organization': {
-#       'name': [('Yaco Sistemas', 'es'), ('Yaco Systems', 'en')],
-#       'display_name': [('Yaco', 'es'), ('Yaco', 'en')],
-#       'url': [('http://www.yaco.es', 'es'), ('http://www.yaco.com', 'en')],
-#       },
+
   }
 
 SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'email'
-# SESSION_ENGINE = 'django.contrib.sessions.backends.file'
+
