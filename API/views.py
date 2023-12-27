@@ -91,7 +91,7 @@ class SAMLResponseView(APIView):
             refresh = RefreshToken.for_user(user)
             # access_token = str(refresh.access_token)
             print("refresh", refresh)
-            redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={access_token}'
+            redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={refresh}'
             # redirect_url = f'http://localhost:3000/sign-in?token={refresh}'
             return redirect(redirect_url)
         except Exception as e:
