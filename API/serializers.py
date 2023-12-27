@@ -711,7 +711,6 @@ class ProjectSerializer(serializers.ModelSerializer):
                 case_obj.category_type.set(category_type_list)
                 case_obj.save()
                 case_list.append(case_obj)
-            random.shuffle(case_list)
             session = Session.objects.create(session_name = project_name, notes = notes)
             session.case.add(*case_list)
             session_list.append(session)
