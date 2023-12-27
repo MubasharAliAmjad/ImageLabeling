@@ -260,7 +260,7 @@ SAML_CONFIG = {
 
            # Mandates that the identity provider MUST authenticate the
            # presenter directly rather than rely on a previous security context.
-          'force_authn': False,
+          'force_authn': True,
 
            # Enable AllowCreate in NameIDPolicy.
           'name_id_format_allow_create': False,

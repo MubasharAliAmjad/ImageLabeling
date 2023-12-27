@@ -90,14 +90,15 @@ class SAMLResponseView(APIView):
             
             refresh = RefreshToken.for_user(user)
             # access_token = str(refresh.access_token)
-            print("refresh", refresh)
+            # print("refresh", refresh)
             redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={refresh}'
             # redirect_url = f'http://localhost:3000/sign-in?token={refresh}'
             return redirect(redirect_url)
         except Exception as e:
-            print("exception:", e)
-            redirect_url = f'https://www.pixelpeek.xyz/sign-in'
+            # print("exception:", e)
+            # redirect_url = f'https://www.pixelpeek.xyz/sign-in'
             # redirect_url = f'http://localhost:3000/sign-in'
+            redirect_url = f'https://www.pixelpeek.xyz/sign-in?error={e}'
             return redirect(redirect_url)
 
 
@@ -197,8 +198,6 @@ class ProjectView(viewsets.ModelViewSet):
 
 
     def list(self, request, *args, **kwargs):
-        # Decode the token and fetch user data
-        
         token = self.request.headers.get("Authorization")
         try:
             token = RefreshToken(token)
@@ -320,6 +319,7 @@ class ExportDataview(APIView):
         row = []
 
         for slice in slice_all:
+            date_time = slice.created_at.strftime("%d:%m:%Y %I:%M:%S %p")
             # row = [slice.project_name, slice.session_name, slice.case_name, date_time, slice.category_type_name, slice.image_id, slice.score, slice.labels, slice.options]
             row = [slice.email, slice.project_name, slice.session_name, slice.case_name, date_time, slice.category_type_name, slice.image_id, slice.score, slice.labels, slice.options]
             csv_data.append(row)

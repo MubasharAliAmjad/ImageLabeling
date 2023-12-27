@@ -459,6 +459,24 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
 
                             # score_string = ""
                 
+                if not score_list and not label_list:
+                    for index, category_type in enumerate(case_obj.category_type.all()):
+                        image_id = str(image_index_list[index])
+                        case_obj.category_type.all()
+                        option_string = ""
+                        for option in category_type.options.all():
+                            if option.checked:
+                                option_string = option.value + "," + option_string
+                            if option_string.endswith(","):
+                                option_string = option_string[:-1]
+                            if image_id == "-1":
+                                slice_obj = Slice.objects.create(email = session_projects[0].user.email, project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", options = option_string)
+                            else:
+                                slice_obj = Slice.objects.create(email = session_projects[0].user.email, project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, options = option_string)
+
+                        instance_slices = list(instance.slice.all())
+                        instance_slices.append(slice_obj)
+                        instance.slice.set(instance_slices)
                 for index, (category_type, score, label) in enumerate(zip(case_obj.category_type.all(), score_list, label_list)):
                     
                     image_id = str(image_index_list[index])
@@ -467,7 +485,6 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                     for option in category_type.options.all():
                         if option.checked:
                             option_string = option.value + "," + option_string
-
                     if option_string.endswith(","):
                                 option_string = option_string[:-1]
                     if not option_string == "" or  (score or  not label == "" ):
@@ -608,6 +625,7 @@ class ProjectSerializer(serializers.ModelSerializer):
                 category_type_folder_list = unzip_serializer.find_category_type_folders(subfolders_path)
                 category_row_list = []
                 category_column_list = []
+                
                 for category_type in category_type_folder_list:
                     if not '_' in category_type:
                         continue
@@ -685,8 +703,9 @@ class ProjectSerializer(serializers.ModelSerializer):
                     case_obj.labels.set(label_list)
                 
                 category_type_list = []
-                for row_data in rows_list:
-                    for column_data in  columns_list:
+                
+                for column_data in columns_list:
+                    for row_data in  rows_list:
                         if f"{row_data}_{column_data}" in list_folders_in_zip:
                             file_folder = f"{row_data}_{column_data}"
                             category_type = self.create_category_type(case, subfolders_path, file_folder, row_data, column_data, options_data)
@@ -707,7 +726,9 @@ class ProjectSerializer(serializers.ModelSerializer):
                                     option_list.append(option)
                                 category_type.options.set(option_list)
                             category_type_list.append(category_type)
-
+                
+                # if randomize_categories:
+                #     random.shuffle(category_type_list)
                 case_obj.category_type.set(category_type_list)
                 case_obj.save()
                 case_list.append(case_obj)
