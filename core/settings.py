@@ -104,7 +104,7 @@ DATABASES = {
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://www.pixelpeek.xyz', 'https://709b-45-117-104-195.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://www.pixelpeek.xyz', 'https://backend.pixelpeek.xyz']
 
 # CORS_ALLOW_ALL_ORIGINS = True
 # CORS_ALLOW_CREDENTIALS = True
@@ -205,7 +205,7 @@ SAML_CONFIG = {
   'xmlsec_binary': '/usr/bin/xmlsec1',
 
   # your entity id, usually your subdomain plus the url to the metadata view
-  'entityid': 'https://709b-45-117-104-195.ngrok-free.app/',
+  'entityid': 'https://backend.pixelpeek.xyz/',
   'attribute_mapping': {
     'email': ('uid',),
    },
@@ -239,7 +239,7 @@ SAML_CONFIG = {
               # url and binding to the assetion consumer service view
               # do not change the binding or service name
               'assertion_consumer_service': [
-                  ('https://709b-45-117-104-195.ngrok-free.app/api/saml2/acs/',
+                  ('https://backend.pixelpeek.xyz/api/saml2/acs/',
                    saml2.BINDING_HTTP_POST),
                   ],
                   # comment
@@ -247,9 +247,9 @@ SAML_CONFIG = {
               # do not change the binding or service name
               'single_logout_service': [
                   # Disable next two lines for HTTP_REDIRECT for IDP's that only support HTTP_POST. Ex. Okta:
-                  ('https://709b-45-117-104-195.ngrok-free.app/api/saml2/ls/',
+                  ('https://backend.pixelpeek.xyz/api/saml2/ls/',
                    saml2.BINDING_HTTP_REDIRECT),
-                  ('https://709b-45-117-104-195.ngrok-free.app/api/saml2/ls/post',
+                  ('https://backend.pixelpeek.xyz/api/saml2/ls/post',
                    saml2.BINDING_HTTP_POST),
                   ],
               },
