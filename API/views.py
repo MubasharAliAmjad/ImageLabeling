@@ -55,6 +55,7 @@ class JsonLoginView(LoginView):
 
 class LogoutView(APIView):
     def post(self, request, *args, **kwargs):
+
         token = self.request.headers.get("Authorization")
         token = RefreshToken(token)
         # token.blacklist()
@@ -89,10 +90,12 @@ class SAMLResponseView(APIView):
             
             refresh = RefreshToken.for_user(user)
             # access_token = str(refresh.access_token)
+            print("refresh", refresh)
             redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={access_token}'
             # redirect_url = f'http://localhost:3000/sign-in?token={refresh}'
             return redirect(redirect_url)
-        except:
+        except Exception as e:
+            print("exception:", e)
             redirect_url = f'https://www.pixelpeek.xyz/sign-in'
             # redirect_url = f'http://localhost:3000/sign-in'
             return redirect(redirect_url)
