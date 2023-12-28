@@ -197,7 +197,7 @@ class SessionCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         try:
             
-            session_id = s.pop('session_id')
+            session_id = validated_data.pop('session_id')
             session_name = validated_data.pop('session_name')
 
             existing_session = Session.objects.get(id = session_id)
