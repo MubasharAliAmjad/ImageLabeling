@@ -190,8 +190,6 @@ class CaseSerializer(serializers.ModelSerializer):
 class SessionCreateSerializer(serializers.ModelSerializer):
     case = CaseSerializer(many = True, read_only = True)
     session_id = serializers.IntegerField(write_only = True)
-    # slices_data = Slice_Fields_Serializer(many = True, write_only = True)
-    # session_name = serializers.CharField(max_length = 200, write_only = True)
     class Meta:
         model = Session
         fields = ["session_id", "session_name","notes", "created_at", "case"]
@@ -319,15 +317,8 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
         return session_projects[0].question
 
     def to_representation(self, instance):
-        # Assuming instance is your data
         return {"session": [super().to_representation(instance)],
-        "question": self.get_project_question(instance)}
-
-    # def to_representation(self, instance):
-    #     representation = super().to_representation(instance)
-    #     representation['question'] = self.get_project_question(instance)
-    #     return representation
-    
+        "question": self.get_project_question(instance)}    
 
     def update(self, instance, validated_data):
         try:
@@ -352,11 +343,6 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                             for instance_category_type in instance_categories_types:
                                 category_type_id = slice["category_type"]
                                 if instance_category_type.id == category_type_id:
-                                    # for image_id in slice["image_id"]:
-                                    #     validated_image_id = int(image_id)
-                                    #     image_instance = instance_category_type.image.get(id = validated_image_id)
-                                    #     image_instance.checked = True
-                                    #     image_instance.save()
                                     for option in instance_category_type.options.all():
                                         if option.id in slice["option"]:
                                             option.checked = True
@@ -424,14 +410,11 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                         label_string = ""
                         count = 0
 
-                # instance_score_index = 0
                 count = 0
                 for label in labels:
 
                     if "-" in label.value:
-                        # score_string = instance_score_list[instance_score_index]
                         if label.score == '0':
-                            # score_string = label.score
                             pass
                         else:
                             score_string = label.score + ","  + score_string
@@ -445,34 +428,20 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                             score_list.append(score_string)
                         score_string = ""
                         count = 0
-
-                            # for instance_score_index in range(cols_number):
-                            #     score_list.append(score_string)
-                            #     instance_score_index = instance_score_index
-                                
-                            # for index in range(len(score_list) - 2, -1, -1):
-                            #     if score_list[index] != "":
-                            #         instance_score_index = index + 1
-                            #         break
-                            
-                            # instance_score_index += 1
-
-                            # score_string = ""
                 
                 if not score_list and not label_list:
                     for index, category_type in enumerate(case_obj.category_type.all()):
                         image_id = str(image_index_list[index])
-                        case_obj.category_type.all()
                         option_string = ""
                         for option in category_type.options.all():
                             if option.checked:
                                 option_string = option.value + "," + option_string
-                            if option_string.endswith(","):
-                                option_string = option_string[:-1]
-                            if image_id == "-1":
-                                slice_obj = Slice.objects.create(email = session_projects[0].user.email, project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", options = option_string)
-                            else:
-                                slice_obj = Slice.objects.create(email = session_projects[0].user.email, project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, options = option_string)
+                                if option_string.endswith(","):
+                                    option_string = option_string[:-1]
+                                if image_id == "-1":
+                                    slice_obj = Slice.objects.create(email = session_projects[0].user.email, project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", score = "", labels = "", options = option_string)
+                                else:
+                                    slice_obj = Slice.objects.create(email = session_projects[0].user.email, project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = "", labels = "", options = option_string)
 
                         instance_slices = list(instance.slice.all())
                         instance_slices.append(slice_obj)
@@ -486,14 +455,13 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                         if option.checked:
                             option_string = option.value + "," + option_string
                     if option_string.endswith(","):
-                                option_string = option_string[:-1]
+                        option_string = option_string[:-1]
                     if not option_string == "" or  (score or  not label == "" ):
                         if image_id == "-1":
                             slice_obj = Slice.objects.create(email = session_projects[0].user.email, project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", score = score, labels = label, options = option_string)
                         else:
                             slice_obj = Slice.objects.create(email = session_projects[0].user.email, project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = score, labels = label, options = option_string)
 
-                        # slice_obj = Slice.objects.create(email = session_projects[0].user.email, project_name = session_projects[0].project_name, session_name = instance.session_name, case_id = case_obj.id, case_name = case_obj.case_name, category_type_name = f"{category_type.category}_{category_type.type}", image_id = image_id, score = score, labels = label, options = option_string)
                         instance_slices = list(instance.slice.all())
                         instance_slices.append(slice_obj)
                         instance.slice.set(instance_slices)
@@ -534,18 +502,6 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = ["id", "project_name", "question", "session", "created_at", "zip_folder", "rows_list", "columns_list", "notes", "session", "case"]
 
 
-    # def get_user_email(self, obj):
-    #     # Access the current user from the request's context
-    #     request = self.context.get('request', None)
-    #     if request and request.user.is_authenticated:
-    #         return request.user.email
-    #     return None
-    
-    # def get_user_email(self, obj):
-    #     # Access the related CustomUser instance and return its email
-    #     return obj.user.email
-
-# overriding methods of serializer is useful when you want to apply logic on particular models
 
     def find_list_folders(self, subfolders_path):
         list_folders = []
@@ -727,8 +683,6 @@ class ProjectSerializer(serializers.ModelSerializer):
                                 category_type.options.set(option_list)
                             category_type_list.append(category_type)
                 
-                # if randomize_categories:
-                #     random.shuffle(category_type_list)
                 case_obj.category_type.set(category_type_list)
                 case_obj.save()
                 case_list.append(case_obj)
@@ -738,7 +692,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             
             user = User.objects.get(id = user_id)
             project = Project.objects.create(user = user, project_name = project_name, question = validated_data.get("question"))
-            # project = Project.objects.create(project_name = project_name, question = validated_data.get("question"))
+        
             project.session.set(session_list)
 
 
