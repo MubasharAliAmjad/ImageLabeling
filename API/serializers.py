@@ -144,7 +144,6 @@ class ReferenceFolderSerializer(serializers.ModelSerializer):
 
 
 class  Slice_Fields_Serializer(serializers.Serializer):
-    # project_id = serializers.IntegerField(write_only = True)
     case_id = serializers.IntegerField(write_only = True)
     category_type = serializers.IntegerField(write_only = True)
     image_id = serializers.ListField(write_only = True,  child=serializers.IntegerField())
@@ -305,7 +304,7 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
     case = CaseSerializer(many = True, read_only = True)
     slices_data = Slice_Fields_Serializer(many = True, write_only = True, required=False)
     labels = LabelsDataSerializer(many = True, write_only = True, required=False)
-    # updated_case_id = serializers.ListField(write_only = True,  child=serializers.IntegerField())
+
     class Meta:
         model = Session
         fields = ["id", "session_name", "notes", "case", "slices_data", "labels"]
@@ -495,10 +494,8 @@ class ProjectSerializer(serializers.ModelSerializer):
     session = SessionSerializer(many = True, read_only = True)
     case = CaseSerializer(many = True, write_only = True)
 
-    # user_email = serializers.SerializerMethodField()
     class Meta:
         model = Project
-        # fields = ["id", "project_name", "user_email", "question", "session", "created_at", "zip_folder", "rows_list", "columns_list", "notes", "session", "case"]
         fields = ["id", "project_name", "question", "session", "created_at", "zip_folder", "rows_list", "columns_list", "notes", "session", "case"]
 
 
@@ -607,9 +604,6 @@ class ProjectSerializer(serializers.ModelSerializer):
                 # Replace the shuffled category elements in the original lists
                 rows_list = [category if category not in category_row_list else shuffled_category_elements_rows.pop(0) for category in rows_list]
                 columns_list = [category if category not in category_column_list else shuffled_category_elements_columns.pop(0) for category in columns_list]
-                # random.shuffle(rows_list)
-                # random.shuffle(columns_list)
-
             
             cols_number = case_data_item[0].get('cols_number')
             rows_number = case_data_item[0].get('rows_number')
@@ -694,8 +688,6 @@ class ProjectSerializer(serializers.ModelSerializer):
             project = Project.objects.create(user = user, project_name = project_name, question = validated_data.get("question"))
         
             project.session.set(session_list)
-
-
         
         except IndexError as e:
             return serializers.ValidationError("Index out of range")
@@ -720,7 +712,6 @@ class ProjectSerializer(serializers.ModelSerializer):
             try:
                 delete_directory(zip_folder_path)
                 media_storage.delete(zip_folder)
-                print(f"Folder '{zip_folder}' has been successfully deleted from media.")
             except OSError as e:
                 print(f"Error deleting folder: {e}")
         else:
