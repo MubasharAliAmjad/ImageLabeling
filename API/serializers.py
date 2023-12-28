@@ -195,9 +195,9 @@ class SessionCreateSerializer(serializers.ModelSerializer):
 
     
     def create(self, validated_data):
-        # try:
+        try:
             
-            session_id = validated_data.pop('session_id')
+            session_id = s.pop('session_id')
             session_name = validated_data.pop('session_name')
 
             existing_session = Session.objects.get(id = session_id)
@@ -220,7 +220,6 @@ class SessionCreateSerializer(serializers.ModelSerializer):
                         new_name = f"{unique_id}_{file_name}"
                         new_image_object = Image()
                         new_image_object.image.save(new_name, ContentFile(file_content), save=True,)
-                        # print("new_image_object: ", new_image_object)
                         new_image_object.save()
                         image_list.append(new_image_object)
                     category_type.image.set(image_list)
@@ -282,15 +281,9 @@ class SessionCreateSerializer(serializers.ModelSerializer):
 
             return new_session
 
+        except Exception as e:
+            raise serializers.ValidationError({'error_message': str(e)})
         
-        # except KeyError as e:
-        #     return serializers.ValidationError(f"Field is missing")
-        # except IndexError as e:
-        #     return serializers.ValidationError("Index out of range")
-        # except AttributeError as e:
-        #     return serializers.ValidationError(f"AttributeError, raised during assigning of object: {e}")
-        # except Exception as e:
-        #     return serializers.ValidationError(f"An exception occurred: {e}")
         
 
 class LabelsDataSerializer(serializers.Serializer):
@@ -466,15 +459,8 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
                         instance.slice.set(instance_slices)
             
 
-        except KeyError as e:
-            field_name = e.args[0] if e.args else 'unknown'
-            return serializers.ValidationError(f"Field '{field_name}' is missing")
-        except IndexError as e:
-            return serializers.ValidationError("Index out of range")
-        except AttributeError as e:
-            return serializers.ValidationError(f"AttributeError, raised during assigning of object: {e}")
         except Exception as e:
-            return serializers.ValidationError(f"An exception occurred: {e}")
+            raise serializers.ValidationError({'error_message': str(e)})
             
         return instance
     
@@ -548,7 +534,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             token = RefreshToken(token)
             user_id = token['user_id']
         except Exception as e:
-            raise serializers.ValidationError({'error': 'Invalid token'})
+            raise serializers.ValidationError({'error_message': 'Invalid token'})
         
         try:
             project_name = validated_data.get("project_name")
@@ -556,9 +542,8 @@ class ProjectSerializer(serializers.ModelSerializer):
             columns_list = validated_data.pop('rows_list')
             rows_list= validated_data.pop('columns_list') 
             case_data_item = validated_data.pop("case")
-        except KeyError as e:
-            field_name = e.args[0] if e.args else 'unknown'
-            return serializers.ValidationError(f"Field '{field_name}' is missing")
+        except Exception as e:
+            raise serializers.ValidationError({'error_message': str(e)})
         
         try:
             zip_folder_path = os.path.join(settings.MEDIA_ROOT, zip_folder)
@@ -689,12 +674,8 @@ class ProjectSerializer(serializers.ModelSerializer):
         
             project.session.set(session_list)
         
-        except IndexError as e:
-            return serializers.ValidationError("Index out of range")
-        except AttributeError as e:
-            return serializers.ValidationError(f"AttributeError, raised during assigning of object: {e}")
         except Exception as e:
-            return serializers.ValidationError(f"An exception occurred: {e}")
+            raise serializers.ValidationError({'error_message': str(e)})
         
         
         def delete_directory(path):
@@ -712,8 +693,8 @@ class ProjectSerializer(serializers.ModelSerializer):
             try:
                 delete_directory(zip_folder_path)
                 media_storage.delete(zip_folder)
-            except OSError as e:
-                print(f"Error deleting folder: {e}")
+            except Exception as e:
+                raise serializers.ValidationError({'error_message': str(e)})
         else:
             print(f"Folder '{zip_folder}' does not exist in media.")
             

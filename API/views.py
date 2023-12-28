@@ -55,12 +55,12 @@ class LogoutView(APIView):
         token = self.request.headers.get("Authorization")
         token = RefreshToken(token)
         if not token:
-            return Response({'error': 'Refresh token not provided'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error_message': 'Refresh token not provided'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             token.blacklist()
             return Response({'success': 'Logout successful'})
         except Exception as e:
-            return Response({'error': 'Invalid refresh token'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error_message': 'Invalid refresh token'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @authentication_classes([SessionAuthentication, BasicAuthentication])
@@ -154,7 +154,7 @@ class ProjectView(viewsets.ModelViewSet):
             token = RefreshToken(token)
             user_id = token['user_id']
         except Exception as e:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error_message': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Fetch user data
         user = User.objects.get(id=user_id)
