@@ -288,9 +288,9 @@ class SessionCreateSerializer(serializers.ModelSerializer):
 
 class LabelsDataSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    value = serializers.CharField(max_length = 200)
+    value = serializers.CharField()
     checked = serializers.BooleanField()
-    score = serializers.CharField(max_length = 200)
+    score = serializers.CharField(max_length = 20)
 
 
 class SessionUpdateSerializer(serializers.ModelSerializer):
@@ -472,10 +472,10 @@ class SessionSerializer(serializers.ModelSerializer):
         fields = ["id", "session_name","notes", "case", "slices_data"]
 
 class ProjectSerializer(serializers.ModelSerializer):
-    zip_folder = serializers.CharField(max_length = 150, write_only = True)
-    rows_list = serializers.ListField(max_length = 50, write_only = True)
-    columns_list = serializers.ListField(max_length = 50, write_only = True)
-    notes = serializers.CharField(max_length = 500, write_only = True)
+    zip_folder = serializers.CharField(write_only = True)
+    rows_list = serializers.ListField(write_only = True)
+    columns_list = serializers.ListField(write_only = True)
+    notes = serializers.CharField(write_only = True)
 
     session = SessionSerializer(many = True, read_only = True)
     case = CaseSerializer(many = True, write_only = True)
@@ -556,8 +556,14 @@ class ProjectSerializer(serializers.ModelSerializer):
         
             randomize_cases = case_data_item[0].pop('randomize_cases')
             randomize_categories = case_data_item[0].pop('randomize_categories')
+
             if randomize_cases:
-                random.shuffle(list_cases_in_zip)
+                count = 0
+                copy_list_cases_in_zip = list_cases_in_zip.copy()
+                while list_cases_in_zip == copy_list_cases_in_zip and count < 5:
+                    random.shuffle(list_cases_in_zip)
+                    count += 1
+            
             if randomize_categories:
                 unzip_serializer = UnzipSerializer()
                 category_type_folder_list = unzip_serializer.find_category_type_folders(subfolders_path)
@@ -582,13 +588,20 @@ class ProjectSerializer(serializers.ModelSerializer):
                 # Shuffle the category elements (using a copy to avoid modifying the original lists)
                 shuffled_category_elements_rows = category_elements_rows.copy()
                 shuffled_category_elements_columns = category_elements_columns.copy()
-
-                random.shuffle(shuffled_category_elements_rows)
-                random.shuffle(shuffled_category_elements_columns)
+                
+                count = 0
+                while shuffled_category_elements_rows == category_elements_rows and count < 5:
+                    random.shuffle(shuffled_category_elements_rows)
+                    count += 1
+                count = 0
+                while shuffled_category_elements_columns == category_elements_columns and count < 5:
+                    random.shuffle(shuffled_category_elements_columns)
+                    count += 1
 
                 # Replace the shuffled category elements in the original lists
                 rows_list = [category if category not in category_row_list else shuffled_category_elements_rows.pop(0) for category in rows_list]
                 columns_list = [category if category not in category_column_list else shuffled_category_elements_columns.pop(0) for category in columns_list]
+                
             
             cols_number = case_data_item[0].get('cols_number')
             rows_number = case_data_item[0].get('rows_number')

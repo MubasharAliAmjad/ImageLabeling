@@ -4,6 +4,7 @@ from django.contrib.auth.admin import UserAdmin
 # Register your models here.
 admin.site.register([Project, Session, Labels, Case, Category_Type, Slice, Image, Reference_Folder, Options, ZipFile, CustomUser])
 
+
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
     list_display = ('email', 'is_staff', 'is_active',)

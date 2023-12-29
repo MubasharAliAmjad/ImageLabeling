@@ -16,9 +16,13 @@ class CustomUser(AbstractUser):
 
 
 class Labels(models.Model):
-    value = models.CharField(max_length=100, null=True, blank=True)
+    value = models.CharField(max_length=255, null=True, blank=True)
     checked = models.BooleanField(default=False)
     score = models.CharField(max_length=20, default=0)
+
+    class Meta:
+        verbose_name = "Label"
+        verbose_name_plural = "Labels"
 
     def __str__(self):
         return self.value
@@ -27,24 +31,28 @@ class ZipFile(models.Model):
     uploaded_file = models.FileField(upload_to="API/ZipFile")
 
 class Options(models.Model):
-    value= models.CharField(max_length=100, blank=True, null=True)
+    value= models.CharField(max_length=255, blank=True, null=True)
     checked = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Option"
+        verbose_name_plural = "Options"
 
     def __str__(self):
         return self.value
 
 class Slice(models.Model):
     email = models.EmailField()
-    project_name = models.CharField(max_length=200)
-    session_name = models.CharField(max_length=200)
+    project_name = models.CharField(max_length=255)
+    session_name = models.CharField(max_length=255)
     case_id = models.PositiveIntegerField(null=True)
-    case_name = models.CharField(max_length=200, null=True)
+    case_name = models.CharField(max_length=255, null=True)
     created_at = models.DateTimeField(auto_now_add = True)
-    category_type_name = models.CharField(max_length=200, null=True)
+    category_type_name = models.CharField(max_length=255, null=True)
     image_id = models.CharField(max_length=1000, null=True)
     score = models.CharField(max_length=10, null=True)
-    labels = models.CharField(max_length=500, null=True)
-    options = models.CharField(max_length=500, null=True)
+    labels = models.CharField(max_length=255, null=True)
+    options = models.CharField(max_length=255, null=True)
     
 
 
@@ -57,7 +65,7 @@ class Image(models.Model):
         return f'media/{self.image.name}'
     
 class Reference_Folder(models.Model):
-    reference_name = models.CharField(max_length=100, null=True, blank=True)
+    reference_name = models.CharField(max_length=255, null=True, blank=True)
     image = models.ManyToManyField(Image, blank=True)
 
     def __str__(self) :
@@ -75,10 +83,9 @@ class Reference_Folder(models.Model):
         return new_folder
     
 
-
 class Category_Type(models.Model):
-    category = models.CharField(max_length=100)
-    type = models.CharField(max_length=100)
+    category = models.CharField(max_length=255)
+    type = models.CharField(max_length=255)
     image = models.ManyToManyField(Image, blank=True)
     options = models.ManyToManyField(Options)
     created_at = models.DateTimeField(auto_now_add = True)
@@ -88,7 +95,7 @@ class Category_Type(models.Model):
     
     
 class Case(models.Model):
-    case_name = models.CharField(max_length=50)
+    case_name = models.CharField(max_length=255)
     cols_number = models.PositiveIntegerField()
     rows_number =models.PositiveIntegerField()
     category_type = models.ManyToManyField(Category_Type, blank=True)
@@ -102,7 +109,7 @@ class Case(models.Model):
 
 class Session(models.Model):
     case = models.ManyToManyField(Case)
-    session_name = models.CharField(max_length=200)
+    session_name = models.CharField(max_length=255)
     notes = models.TextField(blank=True)
     slice = models.ManyToManyField(Slice, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add = True)
