@@ -170,10 +170,10 @@ REST_FRAMEWORK = {
     ],
 }
 
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-#     'REFRESH_TOKEN_LIFETIME': timedelta(days=2),
-# }
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(seconds=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(seconds=2),
+}
 
 
 BASEDIR = path.dirname(path.abspath(__file__))
