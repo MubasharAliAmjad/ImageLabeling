@@ -71,12 +71,12 @@ class SAMLResponseView(APIView):
         try:
             
             refresh = RefreshToken.for_user(user)
-            redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={refresh}'
-            # redirect_url = f'http://localhost:3000/sign-in?token={refresh}'
+            # redirect_url = f'https://www.pixelpeek.xyz/sign-in?token={refresh}'
+            redirect_url = f'http://localhost:3000/sign-in?token={refresh}'
             return redirect(redirect_url)
         except Exception as e:
-            # redirect_url = f'http://localhost:3000/sign-in?error={e}'
-            redirect_url = f'https://www.pixelpeek.xyz/sign-in?error={e}'
+            redirect_url = f'http://localhost:3000/sign-in?error={e}'
+            # redirect_url = f'https://www.pixelpeek.xyz/sign-in?error={e}'
             return redirect(redirect_url)
 
 class UnZipView(viewsets.ViewSet):
