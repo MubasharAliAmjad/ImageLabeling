@@ -730,7 +730,30 @@ class ProjectSerializer(serializers.ModelSerializer):
                                 category_type_list.append(category_type)
                             
                         rows_list, columns_list = self.shuffle_rows_columns(rows_list, columns_list, subfolders_path)
-                        
+                else:
+                    for column_data in columns_list:
+                        for row_data in  rows_list:
+                            if f"{row_data}_{column_data}" in list_folders_in_zip:
+                                file_folder = f"{row_data}_{column_data}"
+                                category_type = self.create_category_type(case, subfolders_path, file_folder, row_data, column_data, options_data)
+                                category_type_list.append(category_type)
+
+                            elif f"{column_data}_{row_data}" in list_folders_in_zip:
+                                file_folder = f"{column_data}_{row_data}"
+                                category_type = self.create_category_type(case, subfolders_path, file_folder, column_data, row_data, options_data)
+                                category_type_list.append(category_type)
+
+                            else:
+                                category_type = Category_Type.objects.create(category = column_data, type = row_data)
+
+                                option_list = []
+                                if not len(options_data) == 0:
+                                    for option_data in options_data:
+                                        option = Options.objects.create(value=option_data['value'])
+                                        option_list.append(option)
+                                    category_type.options.set(option_list)
+                                category_type_list.append(category_type)
+
                 
                 case_obj.category_type.set(category_type_list)
                 case_obj.save()
