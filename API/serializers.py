@@ -309,8 +309,25 @@ class SessionUpdateSerializer(serializers.ModelSerializer):
         return session_projects[0].question
 
     def to_representation(self, instance):
+        # if instance.case.first().randomize_categories:
+        #     
+        #     categories_types = instance.case.first().category_type.all()
+        #     cols_number = instance.case.first().cols_number
+        #     rows_number = instance.case.first().rows_number
+
+        #     rows = [categories_types[i * cols_number:(i + 1) * cols_number] for i in range(rows_number)]
+
+        #     # Shuffle the order of category_type instances in each row
+        #     for row in rows:
+        #         
+        #         random.shuffle(row)
+
+        #     # Flatten the shuffled rows back into a single list
+        #     shuffled_categories_types = [item for sublist in rows for item in sublist]
+        #     # for i in range(0, cols_number):
+        # else:
         return {"session": [super().to_representation(instance)],
-        "question": self.get_project_question(instance)}    
+            "question": self.get_project_question(instance)}    
 
     def update(self, instance, validated_data):
         try:
@@ -484,6 +501,36 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = ["id", "project_name", "question", "session", "created_at", "zip_folder", "rows_list", "columns_list", "notes", "session", "case"]
 
+    # def to_representation(self, instance):
+    #     if instance.session.first().case.first().randomize_categories:
+    #         categories_types = instance.session.first().case.first().category_type.all()
+    #         cols_number = instance.session.first().case.first().cols_number
+    #         rows_number = instance.session.first().case.first().rows_number
+
+    #         rows = [categories_types[i * cols_number:(i + 1) * cols_number] for i in range(rows_number)]
+
+    #         # Shuffle the order of category_type instances in each row
+    #         
+    #         for i, row in enumerate(rows):
+    #             row_list = list(row)
+    #             row_copy = row_list.copy()
+    #             count = 0
+    #             while row_list == row_copy and count < 5:
+    #                 random.shuffle(row_list)
+    #                 count += 1
+    #             rows[i] = row_list
+    #         plane_list = [item for sublist in rows for item in sublist]
+    #         
+                
+                
+
+    #         # Flatten the shuffled rows back into a single list
+    #         # shuffled_categories_types = [item for sublist in rows for item in sublist]
+    #         instance.session.first().case.first().category_type.set(plane_list)
+    #         # for i in range(0, cols_number):
+    #     
+    #     return super().to_representation(instance)
+
 
 
     def find_list_folders(self, subfolders_path):
@@ -526,6 +573,45 @@ class ProjectSerializer(serializers.ModelSerializer):
         category_type.save()
         return category_type
 
+    def shuffle_rows_columns(self, rows_list, columns_list, subfolders_path):
+        unzip_serializer = UnzipSerializer()
+        category_type_folder_list = unzip_serializer.find_category_type_folders(subfolders_path)
+        category_row_list = []
+        category_column_list = []
+        for category_type in category_type_folder_list:
+            if not '_' in category_type:
+                continue
+            category, type = category_type.split('_')
+            if category in rows_list:
+                category_row_list.append(category)
+            if category in columns_list:
+                category_column_list.append(category)
+
+        category_row_list = set(category_row_list)
+        category_column_list = set(category_column_list)
+        # Extract the category elements from both lists
+        category_elements_rows = [category for category in rows_list if category in category_row_list]
+        category_elements_columns = [category for category in columns_list if category in category_column_list]
+
+        # Shuffle the category elements (using a copy to avoid modifying the original lists)
+        shuffled_category_elements_rows = category_elements_rows.copy()
+        shuffled_category_elements_columns = category_elements_columns.copy()
+                
+        count = 0
+        # 
+        while shuffled_category_elements_rows == category_elements_rows and count < 5:
+            random.shuffle(shuffled_category_elements_rows)
+            count += 1
+        count = 0
+        while shuffled_category_elements_columns == category_elements_columns and count < 5:
+            random.shuffle(shuffled_category_elements_columns)
+            count += 1
+
+        # Replace the shuffled category elements in the original lists
+        rows_list = [category if category not in category_row_list else shuffled_category_elements_rows.pop(0) for category in rows_list]
+        columns_list = [category if category not in category_column_list else shuffled_category_elements_columns.pop(0) for category in columns_list]
+        return rows_list, columns_list
+
     
 
     def create(self, validated_data):
@@ -564,43 +650,8 @@ class ProjectSerializer(serializers.ModelSerializer):
                     random.shuffle(list_cases_in_zip)
                     count += 1
             
-            if randomize_categories:
-                unzip_serializer = UnzipSerializer()
-                category_type_folder_list = unzip_serializer.find_category_type_folders(subfolders_path)
-                category_row_list = []
-                category_column_list = []
-                
-                for category_type in category_type_folder_list:
-                    if not '_' in category_type:
-                        continue
-                    category, type = category_type.split('_')
-                    if category in rows_list:
-                            category_row_list.append(category)
-                    if category in columns_list:
-                        category_column_list.append(category)
-
-                category_row_list = set(category_row_list)
-                category_column_list = set(category_column_list)
-                # Extract the category elements from both lists
-                category_elements_rows = [category for category in rows_list if category in category_row_list]
-                category_elements_columns = [category for category in columns_list if category in category_column_list]
-
-                # Shuffle the category elements (using a copy to avoid modifying the original lists)
-                shuffled_category_elements_rows = category_elements_rows.copy()
-                shuffled_category_elements_columns = category_elements_columns.copy()
-                
-                count = 0
-                while shuffled_category_elements_rows == category_elements_rows and count < 5:
-                    random.shuffle(shuffled_category_elements_rows)
-                    count += 1
-                count = 0
-                while shuffled_category_elements_columns == category_elements_columns and count < 5:
-                    random.shuffle(shuffled_category_elements_columns)
-                    count += 1
-
-                # Replace the shuffled category elements in the original lists
-                rows_list = [category if category not in category_row_list else shuffled_category_elements_rows.pop(0) for category in rows_list]
-                columns_list = [category if category not in category_column_list else shuffled_category_elements_columns.pop(0) for category in columns_list]
+            # if randomize_categories:
+            
                 
             
             cols_number = case_data_item[0].get('cols_number')
@@ -651,29 +702,35 @@ class ProjectSerializer(serializers.ModelSerializer):
                     case_obj.labels.set(label_list)
                 
                 category_type_list = []
-                
-                for column_data in columns_list:
-                    for row_data in  rows_list:
-                        if f"{row_data}_{column_data}" in list_folders_in_zip:
-                            file_folder = f"{row_data}_{column_data}"
-                            category_type = self.create_category_type(case, subfolders_path, file_folder, row_data, column_data, options_data)
-                            category_type_list.append(category_type)
+                if randomize_categories:
+                    
+                    rows_list, columns_list = self.shuffle_rows_columns(rows_list, columns_list, subfolders_path)
+                    
+                    for column_data in columns_list:
+                        for row_data in  rows_list:
+                            if f"{row_data}_{column_data}" in list_folders_in_zip:
+                                file_folder = f"{row_data}_{column_data}"
+                                category_type = self.create_category_type(case, subfolders_path, file_folder, row_data, column_data, options_data)
+                                category_type_list.append(category_type)
 
-                        elif f"{column_data}_{row_data}" in list_folders_in_zip:
-                            file_folder = f"{column_data}_{row_data}"
-                            category_type = self.create_category_type(case, subfolders_path, file_folder, column_data, row_data, options_data)
-                            category_type_list.append(category_type)
+                            elif f"{column_data}_{row_data}" in list_folders_in_zip:
+                                file_folder = f"{column_data}_{row_data}"
+                                category_type = self.create_category_type(case, subfolders_path, file_folder, column_data, row_data, options_data)
+                                category_type_list.append(category_type)
 
-                        else:
-                            category_type = Category_Type.objects.create(category = column_data, type = row_data)
+                            else:
+                                category_type = Category_Type.objects.create(category = column_data, type = row_data)
 
-                            option_list = []
-                            if not len(options_data) == 0:
-                                for option_data in options_data:
-                                    option = Options.objects.create(value=option_data['value'])
-                                    option_list.append(option)
-                                category_type.options.set(option_list)
-                            category_type_list.append(category_type)
+                                option_list = []
+                                if not len(options_data) == 0:
+                                    for option_data in options_data:
+                                        option = Options.objects.create(value=option_data['value'])
+                                        option_list.append(option)
+                                    category_type.options.set(option_list)
+                                category_type_list.append(category_type)
+                            
+                        rows_list, columns_list = self.shuffle_rows_columns(rows_list, columns_list, subfolders_path)
+                        
                 
                 case_obj.category_type.set(category_type_list)
                 case_obj.save()
