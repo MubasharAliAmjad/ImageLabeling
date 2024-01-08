@@ -43,10 +43,15 @@ The Image Labelling project allows users to label images with relevant tags.
 
    ```
 
-'''if xmlsec raise error'''
-'''do following'''
-'''sudo apt-get install python3-dev
+In case xmlsec raise error, Run following commands for in this order (for Linux based OS)
+
+```bash
+sudo apt-get install python3-dev
+
 sudo apt-get install pkg-config
+
 sudo apt-get install libxmlsec1-dev
-udo apt-get install build-essential
-sudo apt-get install python3-dev'''
+
+sudo apt-get install build-essential
+
+sudo apt-get install python3-dev```
